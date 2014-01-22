@@ -42,7 +42,7 @@ public class OccupancyModel {
 	public static void main(String[] args) {
 		OccupancyModel model = new OccupancyModel();
 		try {
-			model.RunOccupancySimulation(2, false, "data/output.csv");
+			model.RunOccupancySimulation(2, false, "data/occupancy_output.csv");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
