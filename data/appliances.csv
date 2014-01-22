@@ -1,0 +1,70 @@
+Appliance Model Configuration,,,,,,,,,
+,,,,,,,,,
+1,"UK Market Transformation Programme, Department for Environment, Food and Rural Affairs, Smith Square, London, UK, http://www.mtprog.com/.  Crown Copyright.",,,,,,,,
+,"BN DW Shower: Actions to improve shower desidn and efficiency - Briefing Note relating to policy scenario objectives in Policy Brief (Version 2.0), 2006",,,,,,,,
+,"BNXS30: Vacuum cleaners - UK market, technologies, energy use, test methods and waste (Version 1.7), 2006",,,,,,,,
+,"BNW06: Assumptions underlying the energy projections for domestic tumble dryers (Version 3.1), 2006",,,,,,,,
+,"BNCK07: Comparing energy use in microwave ovens with traditional electric fuelled methods (Version 1.1), 2006",,,,,,,,
+,"BNCK06: Trends in kettle type and usage and possible impact on energy consumption (Version 2.1), 2006",,,,,,,,
+,"BNXS36: Estimated UK standby electricity consumption in 2006 (Version 2.2), 2006",,,,,,,,
+,"Policy brief: Improving the energy performance of domestic cold appliance, 2008",,,,,,,,
+,"BNW07: Assumptions underlying the energy projections for domestic dishwashers (Version 3.1), 2006",,,,,,,,
+,"BNWAT24: Performance and efficiency: reviewing and defining showers (Version 1.0), 2008",,,,,,,,
+,"BNW05: Assumptions underlying the energy projections for domestic washing machines (Version 3.1), 2006",,,,,,,,
+,"BNTV01: Televisions: Future Stock and Energy Trends (Version 3.1), 2005",,,,,,,,
+,"BNDA3: Digital TV adapters in the UK - rationale/assumptions for projecting future energy consumption (Version 1.1), 2005",,,,,,,,
+,"Policy brief: Improving the energy performance of consumer electronics products, 2008",,,,,,,,
+,"Policy brief: Improving the energy performance of information and communication technology products, 2008",,,,,,,,
+,,,,,,,,,
+2,"  UK Department of Energy and Climate Change, Energy Consumption in the UK, Domestic data tables, A National Statistics Publication. ",,,,,,,,
+,"Energy consumption in the UK, Domestic Energy Consumption in the UK",,,,,,,,
+,http://www.decc.gov.uk/en/content/cms/statistics/publications/ecuk/ecuk.aspx,,,,,,,,
+,Table 3.6: Domestic energy consumption by end use,,,,,,,,
+,Table 3.7: Domestic energy consumption by end use and fuel,,,,,,,,
+,Table 3.10: Total electricity consumption by household domestic appliances,,,,,,,,
+,Table 3.12: Percentage of households owning domestic appliances,,,,,,,,
+,Table 3.14: Households with central heating by type in Great Britain,,,,,,,,
+,,,,,,,,,
+3," T. Fawcett, K. Lane, B. Boardman, et al., Lower Carbon Futures for European Households, Environmental Change Institute (ECI), University of Oxford, UK. 2000",,,,,,,,
+4," 40% House, B. Boardman et al., Environmental Change Institute, University of Oxford, 2005.",,,,,,,,
+5,"Office for National Statistics, Social Trends No. 37 (2007 Edition), Table 2.1 Households by Size, Crown Copyright 2007",,,,,,,,
+6,"UK Ofcom, Southwark Bridge Road, London, http://www.ofcom.org.uk/research/. ",,,,,,,,
+7,"The Energy Saving Trust, Domestic heating by electricity (2006 edition), CE185, 2006.",,,,,,,,
+8,"J. Paatero, P. Lund, A model for generating household electricity load profiles, International Journal of Energy Research 30 (5) (2006) 273–290.",,,,,,,,
+9,"M. Newborough, p. Augood, Demand-side management opportunities for the UK domestic sector, IEE Proceedings - Generation, Transmission and Distribution, Vol. 146, No. 3, May 1999",,,,,,,,
+10,"G. Wood, M. Newborough, Dynamic energy-consumption indicators for domestic appliances: environment, behaviour and design, Energy and Buildings, Volume 35, Issue 8, September 2003, Pages 821-841, ISSN 0378-7788, DOI: 10.1016/S0378-7788(02)00241-4.",,,,,,,,
+,,,,,,,,,
+Appliance name,Activity use profile,ownership,Total energy (kWh/y),Standby power (W),Mean power cycle (W),Base cycles per year ,Mean cycle length (min),Restart delay (min),Calibration scalar
+CHEST_FREEZER,LEVEL,0.163,271.1319969,0,190,6115.759329,14,56,0.062727765
+FRIDGE_FREEZER,LEVEL,0.651,426.0645666,0,190,6115.759329,22,44,0.050145664
+FRIDGE,LEVEL,0.43,201.8200578,0,110,6115.759329,18,36,0.031306838
+UPRIGHT_FREEZER,LEVEL,0.291,315.9808986,0,155,6115.759329,20,40,0.038547672
+ANSWER_MACHINE,ACTIVE_OCC,0.9,8.76,1,0,0.00001,0,0,4.14823E-11
+CD_PLAYER,ACTIVE_OCC,0.9,33.28591716,2,15,1212.762858,60,0,0.00720593
+CLOCK,LEVEL,0.9,17.52,2,0,0.00001,0,0,1.90259E-11
+PHONE,ACTIVE_OCC,0.9,8.76,1,0,0.00001,0,0,4.14823E-11
+HIFI,ACTIVE_OCC,0.9,88.79772459,9,100,109.425545,60,0,0.000466632
+IRON,ACT_IRON,0.9,17.72973461,0,1000,35.45946921,30,0,0.008001825
+VACUUM,ACT_HOUSECLEAN,0.937,73.57839861,0,2000,110.3675979,20,0,0.006952224
+FAX,ACTIVE_OCC,0.2,29.74280437,3,37,197.1235883,31,0,0.000838982
+PC,ACTIVE_OCC,0.708,348.6079727,5,141,449.2379848,300,0,0.00422633
+PRINTER,ACTIVE_OCC,0.665,49.49966115,4,335,654.875958,4,0,0.002746422
+TV1,ACT_TV,0.977,241.8444387,3,124,1464.266537,73,0,0.032120667
+TV2,ACT_TV,0.58,241.8444387,3,124,1464.266537,73,0,0.032120667
+TV3,ACT_TV,0.18,243.3607179,2,124,1521.495966,73,0,0.034448686
+VCR_DVD,ACT_TV,0.896,73.7310059,2,34,1464.266537,73,0,0.032120667
+RECEIVER,ACT_TV,0.934,152.4642842,15,27,1464.266537,73,0,0.032120667
+HOB,ACT_COOKING,0.463,276.1058441,1,2400,417.9020073,16,0,0.01235985
+OVEN,ACT_COOKING,0.616,236.1601457,3,2125,219.792801,27,0,0.006479791
+MICROWAVE,ACT_COOKING,0.859,76.56245718,2,1250,94.61932241,30,0,0.002753256
+KETTLE,ACTIVE_OCC,0.975,160.6662955,1,2000,1519.822866,3,0,0.006426123
+SMALL_COOKING,ACT_COOKING,1,32.10707858,2,1000,292.326224,3,0,0.008436711
+DISH_WASHER,ACT_COOKING,0.335,273.0161699,0,1131,241.4763957,60,0,0.007387824
+TUMBLE_DRYER,ACT_LAUNDRY,0.416,313.8202164,1,2500,122.0729157,60,0,0.029509717
+WASHING_MACHINE,ACT_LAUNDRY,0.781,191.0412921,1,406,195.9065959,138,0,0.051719499
+WASHER_DRYER,ACT_LAUNDRY,0.153,520.1574761,1,792,195.9065959,198,0,0.05472494
+DESWH,ACTIVE_OCC,0.17,2684.996846,0,3000,2684.996846,20,0,0.014330186
+E_INST,ACTIVE_OCC,0.01,1802.158209,0,3000,7208.632835,5,0,0.03516007
+ELEC_SHOWER,ACT_WASHDRESS,0.67,130.6779776,0,9000,290.3955057,3,0,0.009660846
+STORAGE_HEATER,CUSTOM,0.0277,13905.17757,0,10200,227.2087838,360,0,0.000822434
+ELEC_SPACE_HEATING,ACTIVE_OCC,0.026,2925.40621,0,2000,365.6757762,240,0,0.002385294
