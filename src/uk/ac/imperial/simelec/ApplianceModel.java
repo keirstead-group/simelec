@@ -52,7 +52,7 @@ public class ApplianceModel {
 	// Define the relative monthly temperatures
 	// Data derived from MetOffice temperature data for the Midlands in 2007
 	// (http://www.metoffice.gov.uk/climate/uk/2007/) Crown Copyright
-	private double[] oMonthlyRelativeTemperatureModifier = { 0, 1.63, 1.821,
+	private double[] oMonthlyRelativeTemperatureModifier = { 1.63, 1.821,
 			1.595, 0.867, 0.763, 0.191, 0.156, 0.087, 0.399, 0.936, 1.561,
 			1.994 };
 
@@ -156,8 +156,7 @@ public class ApplianceModel {
 								// If this appliance is an electric space
 								// heater, then activity probability is a
 								// function of the month of the year
-								// TODO 13 entries in this array, not 12?
-								dActivityProbability = oMonthlyRelativeTemperatureModifier[month];
+								dActivityProbability = oMonthlyRelativeTemperatureModifier[month - 1];
 							}
 
 							// Check the probability of a start event
