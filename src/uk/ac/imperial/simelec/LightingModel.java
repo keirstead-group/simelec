@@ -160,7 +160,7 @@ public class LightingModel {
 	 * @return
 	 * @throws IOException
 	 */
-	private int[] getOccupancy(String file) throws IOException {
+	static int[] getOccupancy(String file) throws IOException {
 		CSVReader reader = new CSVReader(new FileReader(file));
 		List<String[]> myEntries = reader.readAll();
 		int[] result = new int[myEntries.size()];
