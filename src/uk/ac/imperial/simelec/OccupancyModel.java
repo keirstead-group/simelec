@@ -25,6 +25,7 @@
  */
 package uk.ac.imperial.simelec;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,15 +40,56 @@ import cern.jet.random.engine.RandomEngine;
 
 public class OccupancyModel {
 
+	private int nResidents;
+	private boolean weekend;
+	private String out_dir;
+	
 	public static void main(String[] args) {
-		OccupancyModel model = new OccupancyModel();
+		
+		int residents;
+		boolean weekend;
+		String output_dir;
+
+		if (args.length == 3) {
+			residents = Integer.valueOf(args[0]);
+			weekend = args[1].equals("we") ? true : false;
+			output_dir = args[2];
+		} else {
+			System.out.printf(
+					"%d arguments detected.  Using default arguments.%n",
+					args.length);
+			residents = 2;
+			weekend = false;
+			output_dir = ".";
+		}
+		
+		OccupancyModel model = new OccupancyModel(residents, weekend, output_dir);
+		
 		try {
-			model.RunOccupancySimulation(2, false, "data/occupancy_output.csv");
+			model.RunOccupancySimulation();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//	model.RunOccupancySimulation(2, false, "data/occupancy_output.csv");
+		
 	}
 
+	public OccupancyModel(int residents, boolean weekend, String dir) {
+		setResidents(residents);
+		this.weekend = weekend;
+		this.out_dir = dir;
+	}
+	
+	public void setResidents(int residents) {
+		if (residents>=1 && residents<=5) {
+			this.nResidents = residents;
+		} else {
+			System.out.printf("%d residents specified, only 1 to 5 supported. Defaulting to 2.%n", residents);
+			this.nResidents = 2;
+		}
+	}
+	
 	/**
 	 * Simulate the number of active occupants in a domestic dwelling for a
 	 * single day at ten-minute intervals.
@@ -62,19 +104,17 @@ public class OccupancyModel {
 	 * 
 	 * @throws IOException
 	 */
-	public void RunOccupancySimulation(int nResidents, boolean weekend,
-			String outputFile) throws IOException {
+	public void RunOccupancySimulation() throws IOException {
 
-		// Step 1: Check inputs
-		if (nResidents < 0 || nResidents > 5) {
-			System.out.print("1-5 residents only.  Simulating for 1 resident.");
-			nResidents = 1;
-		}
 
 		// Set up the random number generator
 		RandomEngine engine = new MersenneTwister(12345);
 		Uniform.staticSetRandomEngine(engine);
 
+		// Ensure the output directory exists
+		File dir = new File(this.out_dir);
+		if (!dir.isDirectory()) dir.mkdirs();
+				
 		// Step 2: Determine the active occupancy start state between 00:00 and
 		// 00:10
 
@@ -130,6 +170,7 @@ public class OccupancyModel {
 		}
 
 		// Save the result to a CSV file
+		File outputFile = new File(dir, "occupancy_output.csv");
 		CSVWriter writer = new CSVWriter(new FileWriter(outputFile));
 		writer.writeAll(results);
 		writer.close();
