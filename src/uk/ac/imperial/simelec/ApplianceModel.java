@@ -25,6 +25,7 @@
  */
 package uk.ac.imperial.simelec;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cern.jet.random.Normal;
 import cern.jet.random.Uniform;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -43,6 +43,12 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class ApplianceModel {
 
+	private int month;
+	private boolean weekend;
+	private String out_dir;
+	private String occupancy_file = "occupancy_output.csv";
+	private File out_file;
+	
 	private static String activity_file = "data/activities.csv";
 	private static String appliance_file = "data/appliances.csv";
 
@@ -58,13 +64,11 @@ public class ApplianceModel {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		ApplianceModel model = new ApplianceModel();
-		model.RunApplianceSimulation(1, false, "data/appliance_output.csv");
+		ApplianceModel model = new ApplianceModel(1, false, ".");
+		model.RunApplianceSimulation();
 	}
-
+	
 	/**
-	 * Run the appliance electricity demand simulation.
-	 * 
 	 * @param month
 	 *            an integer giving the month of the year to simulate
 	 * @param weekend
@@ -72,13 +76,36 @@ public class ApplianceModel {
 	 *            <code>true</code> or weekday <code>false</code>
 	 * @param output_file
 	 *            a string giving the path for the output file
+	 */
+	public ApplianceModel(int month, boolean weekend, String dir) {
+		this.setMonth(month);
+		this.weekend = weekend;
+		this.out_dir = dir;
+		this.out_file = new File(out_dir, "appliance_output.csv");
+	}
+
+	public void setMonth(int month) {
+		if (month >= 1 && month <= 12) {
+			this.month = month;
+		} else {
+			System.out
+					.printf("Invalid month %d specified.  Defaulting to 1 (January).%n",
+							month);
+			this.month = 1;
+		}
+	}
+
+
+
+	/**
+	 * Run the appliance electricity demand simulation.
+	 * 
 	 * @throws IOException
 	 */
-	public void RunApplianceSimulation(int month, boolean weekend,
-			String output_file) throws IOException {
+	public void RunApplianceSimulation() throws IOException {
 
-		int[] occupancy = LightingModel
-				.getOccupancy("data/occupancy_output.csv");
+		File occupancy_file = new File(out_dir, this.occupancy_file);
+		int[] occupancy = LightingModel.getOccupancy(occupancy_file.getPath());		
 
 		// Load in the basic data
 		List<ProbabilityModifier> activities = loadActivityStatistics();
@@ -105,7 +132,6 @@ public class ApplianceModel {
 				// Make the rated power variable over a normal distribution to
 				// provide some variation
 				a.setRatedPower();
-			
 
 				// Initialise the daily simulation loop
 				int time = 0;
@@ -124,8 +150,6 @@ public class ApplianceModel {
 					int iActiveOccupants = occupancy[(int) Math
 							.floor((time - 1) / 10)];
 
-				
-
 					// If this appliance is off having completed a cycle (ie. a
 					// restart delay)
 					if ((a.cycle_time_left <= 0)
@@ -139,11 +163,10 @@ public class ApplianceModel {
 
 						// There must be active occupants, or the profile must
 						// not depend on occupancy for a start event to occur
-						if ((iActiveOccupants > 0 && !a.use_profile.equals("CUSTOM"))
+						if ((iActiveOccupants > 0 && !a.use_profile
+								.equals("CUSTOM"))
 								|| (a.use_profile.equals("LEVEL"))) {
-							
-							
-							
+
 							// Variable to store the event probability (default
 							// to 1)
 							double dActivityProbability = 1;
@@ -155,9 +178,10 @@ public class ApplianceModel {
 									&& (!a.use_profile.equals("CUSTOM"))) {
 
 								// Get the right activity
-								ProbabilityModifier pm = getProbabilityModifier(activities,
-										weekend, iActiveOccupants, a.use_profile);
-								
+								ProbabilityModifier pm = getProbabilityModifier(
+										activities, weekend, iActiveOccupants,
+										a.use_profile);
+
 								// Get the activity statistics for this profile
 								// Get the probability for this activity profile
 								// for this time step
@@ -284,7 +308,7 @@ public class ApplianceModel {
 			String[] tmp = new String[1440 + 1];
 			double[] data = results.get(a);
 			tmp[0] = a.name;
-			
+
 			for (int i = 0; i < 1440; i++) {
 				tmp[i + 1] = String.valueOf(data[i]);
 			}
@@ -292,7 +316,7 @@ public class ApplianceModel {
 		}
 
 		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(output_file));
+		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file));
 		writer.writeAll(final_vals);
 		writer.close();
 
@@ -313,7 +337,8 @@ public class ApplianceModel {
 	}
 
 	private void configure_appliances(List<Appliance> apps) {
-		for (Appliance a : apps) a.assign_ownership();
+		for (Appliance a : apps)
+			a.assign_ownership();
 	}
 
 	private List<ProbabilityModifier> loadActivityStatistics()
@@ -373,164 +398,6 @@ public class ApplianceModel {
 		}
 	}
 
-	public static boolean isBetween(int x, int lower, int upper) {
-		return lower <= x && x <= upper;
-	}
-
-	private class Appliance {
-		public int power;
-		String name;
-		String use_profile;
-		double ownership_rate;
-		int standby_power;
-		int mean_power;
-		int rated_power;
-		double cycles_per_year;
-		int cycle_length;
-		int restart_delay;
-		double calibration;
-		boolean owned = false;
-		int cycle_time_left = 0;
-		int restart_delay_time_left = 0;
-
-
-		private Appliance(String name, String profile, double ownership,
-				double energy, int standby, int mean, double cycles,
-				int length, int restart, double calibration) {
-			this.name = name;
-			this.use_profile = profile.toUpperCase();
-			this.ownership_rate = ownership;
-
-			// this.total_energy = energy;
-			this.standby_power = standby;
-			this.mean_power = mean;
-			this.cycles_per_year = cycles;
-			this.cycle_length = length;
-			this.restart_delay = restart;
-			this.calibration = calibration;
-		}
-
-		public void setRatedPower() {
-			rated_power = (int) Normal.staticNextDouble(mean_power,
-					mean_power/10);
-			
-		}
-
-		public void setRestartDelay() {
-			restart_delay_time_left = (int) Uniform.staticNextDouble()
-					* restart_delay * 2;
-		}
-
-		public void start() {
-
-			// Determine how long this appliance is going to be on for
-			cycle_time_left = CycleLength();
-
-			// Determine if this appliance has a delay after the cycle before it
-			// can restart
-			restart_delay_time_left = this.restart_delay;
-
-			// Set the power
-			this.power = GetPowerUsage(cycle_time_left);
-
-			// Decrement the cycle time left
-			cycle_time_left--;
-
-		}
-
-		private int GetPowerUsage(int cycle_time_left) {
-			// Set the working power to the rated power
-			int tmp_power = this.rated_power;
-
-			// Some appliances have a custom (variable) power profile depending
-			// on the time left
-			if (this.name.equals("WASHING_MACHINE") || this.name.equals("WASHER_DRYER")) {
-
-				int total_cycle_time = 0;
-
-				// Calculate the washing cycle time
-				if (this.name.equals("WASHING_MACHINE"))
-					total_cycle_time = 138;
-				if (this.name.equals("WASHER_DRYER"))
-					total_cycle_time = 198;
-
-				// This is an example power profile for an example washing
-				// machine
-				// This simplistic model is based upon data from personal
-				// communication with a major washing maching manufacturer
-				int tmp = total_cycle_time - cycle_time_left + 1;
-
-				if (isBetween(tmp, 1, 8)) {
-					tmp_power = 73; // start-up and fill
-				} else if (isBetween(tmp, 9, 29)) {
-					tmp_power = 2056; // heating
-				} else if (isBetween(tmp, 30, 81)) {
-					tmp_power = 73; // Wash and drain
-				} else if (isBetween(tmp, 82, 92)) {
-					tmp_power = 73; // spin
-				} else if (isBetween(tmp, 93, 94)) {
-					tmp_power = 250; // rinse
-				} else if (isBetween(tmp, 95, 105)) {
-					tmp_power = 73; // Spin
-				} else if (isBetween(tmp, 106, 107)) {
-					tmp_power = 250; // rinse
-				} else if (isBetween(tmp, 108, 118)) {
-					tmp_power = 73; // Spin
-				} else if (isBetween(tmp, 119, 120)) {
-					tmp_power = 250; // rinse
-				} else if (isBetween(tmp, 121, 131)) {
-					tmp_power = 73; // Spin
-				} else if (isBetween(tmp, 132, 133)) {
-					tmp_power = 250; // rinse
-				} else if (isBetween(tmp, 134, 138)) {
-					tmp_power = 568; // fast spin
-				} else if (isBetween(tmp, 139, 198)) {
-					tmp_power = 2500; // Drying cycle
-				} else {
-					tmp_power = this.standby_power;
-				}
-
-			}
-
-			return (tmp_power);
-
-		}
-
-		private int CycleLength() {
-			// Set the value to that provided in the configuration
-			int CycleLength = this.cycle_length;
-
-			// Use the TV watching length data approximation, derived from the
-			// TUS data
-			if ((this.name.equals("TV1")) || (this.name.equals("TV2"))
-					|| (this.name.equals("TV3"))) {
-
-				// The cycle length is approximated by the following function
-				// The average viewing time is approximately 73 minutes
-				CycleLength = (int) Math.round((70 * ((0 - Math.pow(
-						Math.log((1 - Uniform.staticNextDouble())), 1.1)))));
-
-			} else if ((this.name.equals("STORAGE_HEATER"))
-					|| (this.name.equals("ELEC_SPACE_HEATING"))) {
-
-				// Provide some variation on the cycle length of heating
-				// appliances
-				CycleLength = (int) Normal.staticNextDouble(this.cycle_length,
-						this.cycle_length / 10);
-			}
-
-			return (CycleLength);
-		}
-
-		private void assign_ownership() {
-			double rnd = Uniform.staticNextDouble();
-			if (rnd < this.ownership_rate)
-				owned = true;
-		}
-
-		private boolean isOwned() {
-			return (this.owned);
-		}
-
-	}
+	
+	
 }
