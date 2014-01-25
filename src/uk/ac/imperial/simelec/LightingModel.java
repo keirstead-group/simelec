@@ -25,6 +25,7 @@
  */
 package uk.ac.imperial.simelec;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -38,13 +39,56 @@ import cern.jet.random.Uniform;
 
 public class LightingModel {
 
+	private int month;
+	private float mean_irradiance = 60f;
+	private float sd_irradiance = 10f;
+	private String out_dir;
+	private String occupancy_file = "occupancy_output.csv";
+	
+	public LightingModel(int month, String dir) {
+		setMonth(month);
+		this.out_dir = dir;
+	}
+
+	public void setMonth(int month) {
+		if (month >= 1 && month <= 12) {
+			this.month = month;
+		} else {
+			System.out
+					.printf("Invalid month %d specified.  Defaulting to 1 (January).%n",
+							month);
+			this.month = 1;
+		}
+	}
+
 	/**
 	 * @param args
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		LightingModel model = new LightingModel();
-		model.RunLightingSimulation(7, 60f, 10f, "data/lighting_output.csv");
+		
+		int month;
+		String dir;		
+		
+		if (args.length == 2 || args.length==4) {			
+			month = Integer.valueOf(args[0]);
+			dir = args[1];						
+		} else {
+			System.out.printf(
+					"%d arguments detected.  Using default arguments.%n",
+					args.length);
+			month = 1;
+			dir = ".";
+		}
+		
+		LightingModel model = new LightingModel(month, dir);
+		
+		if (args.length == 4) {			
+			model.mean_irradiance = Float.valueOf(args[2]);
+			model.sd_irradiance = Float.valueOf(args[3]);
+		}
+		
+		model.RunLightingSimulation();
 	}
 
 	/**
@@ -58,17 +102,22 @@ public class LightingModel {
 	 * @throws IOException
 	 * 
 	 */
-	public void RunLightingSimulation(int month, float irradiance_mu,
-			float irradiance_sd, String output_file) throws IOException {
+	public void RunLightingSimulation() throws IOException {
 
+		// Ensure the output directory exists
+		File dir = new File(this.out_dir);
+		if (!dir.isDirectory()) dir.mkdirs();
+		
 		// Calculation the irradiance threshold for the house
-		float iThreshold = (float) Normal.staticNextDouble(irradiance_mu,
-				irradiance_sd);
+		float iThreshold = (float) Normal.staticNextDouble(this.mean_irradiance,
+				this.sd_irradiance);
 
 		// Calculate the number of bulbs in the household
 		List<Bulb> bulbs = getBulbs();
 		int[] irradiance = getIrradianceData(month);
-		int[] occupancy = getOccupancy("data/occupancy_output.csv");
+
+		File occupancy_file = new File(out_dir, this.occupancy_file);
+		int[] occupancy = getOccupancy(occupancy_file.getPath());
 
 		// Main simulation loop
 		// for each bulb in the household
@@ -116,7 +165,8 @@ public class LightingModel {
 		}
 		
 		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(output_file));
+		File outputFile = new File(out_dir, "lighting_output.csv");
+		CSVWriter writer = new CSVWriter(new FileWriter(outputFile));
 		writer.writeAll(results);
 		writer.close();
 				
