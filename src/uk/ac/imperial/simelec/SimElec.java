@@ -52,7 +52,7 @@ public class SimElec {
 	 *            output directory. If the arguments are not specified, the
 	 *            default simulation is for a two-person household on a weekday
 	 *            in January with the files written in the current directory.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
 
@@ -97,28 +97,37 @@ public class SimElec {
 	public SimElec(int month, int residents, boolean weekend, String output_dir) {
 
 		// Set the inputs cleaning as necessary
-		this.setMonth(month);
+		this.month = validateMonth(month);
 		this.setResidents(residents);
 		this.weekend = weekend;
 		this.output_dir = output_dir;
 	}
 
-	public void setMonth(int month) {
+	/**
+	 * Validates a specified month.
+	 * 
+	 * @param month
+	 *            an int specifying the month (1-12)
+	 * @return the specified month is a valid month, or 1 if not.
+	 */
+	public static int validateMonth(int month) {
 		if (month >= 1 && month <= 12) {
-			this.month = month;
+			return (month);
 		} else {
 			System.out
 					.printf("Invalid month %d specified.  Defaulting to 1 (January).%n",
 							month);
-			this.month = 1;
+			return (1);
 		}
 	}
 	
 	public void setResidents(int residents) {
-		if (residents>=1 && residents<=5) {
+		if (residents >= 1 && residents <= 5) {
 			this.nResidents = residents;
 		} else {
-			System.out.printf("%d residents specified, only 1 to 5 supported. Defaulting to 2.%n", residents);
+			System.out
+					.printf("%d residents specified, only 1 to 5 supported. Defaulting to 2.%n",
+							residents);
 			this.nResidents = 2;
 		}
 	}
@@ -126,7 +135,7 @@ public class SimElec {
 	/**
 	 * Runs the simulation.
 	 * 
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void run() throws IOException {
 
@@ -134,7 +143,8 @@ public class SimElec {
 		occ.RunOccupancySimulation();
 		LightingModel lights = new LightingModel(month, output_dir);
 		lights.RunLightingSimulation();
-		ApplianceModel appliances = new ApplianceModel(month, weekend, output_dir);
+		ApplianceModel appliances = new ApplianceModel(month, weekend,
+				output_dir);
 		appliances.RunApplianceSimulation();
 
 	}

@@ -46,20 +46,10 @@ public class LightingModel {
 	private String occupancy_file = "occupancy_output.csv";
 	
 	public LightingModel(int month, String dir) {
-		setMonth(month);
+		this.month = SimElec.validateMonth(month);
 		this.out_dir = dir;
 	}
-
-	public void setMonth(int month) {
-		if (month >= 1 && month <= 12) {
-			this.month = month;
-		} else {
-			System.out
-					.printf("Invalid month %d specified.  Defaulting to 1 (January).%n",
-							month);
-			this.month = 1;
-		}
-	}
+	
 
 	/**
 	 * @param args

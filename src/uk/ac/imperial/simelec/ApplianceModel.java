@@ -78,22 +78,11 @@ public class ApplianceModel {
 	 *            a string giving the path for the output file
 	 */
 	public ApplianceModel(int month, boolean weekend, String dir) {
-		this.setMonth(month);
+		this.month = SimElec.validateMonth(month);
 		this.weekend = weekend;
 		this.out_dir = dir;
 		this.out_file = new File(out_dir, "appliance_output.csv");
-	}
-
-	public void setMonth(int month) {
-		if (month >= 1 && month <= 12) {
-			this.month = month;
-		} else {
-			System.out
-					.printf("Invalid month %d specified.  Defaulting to 1 (January).%n",
-							month);
-			this.month = 1;
-		}
-	}
+	}	
 
 
 
