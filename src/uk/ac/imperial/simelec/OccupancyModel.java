@@ -76,20 +76,11 @@ public class OccupancyModel {
 	}
 
 	public OccupancyModel(int residents, boolean weekend, String dir) {
-		setResidents(residents);
+		this.nResidents = SimElec.validateResidents(residents);
 		this.weekend = weekend;
 		this.out_dir = dir;
 	}
-	
-	public void setResidents(int residents) {
-		if (residents>=1 && residents<=5) {
-			this.nResidents = residents;
-		} else {
-			System.out.printf("%d residents specified, only 1 to 5 supported. Defaulting to 2.%n", residents);
-			this.nResidents = 2;
-		}
-	}
-	
+		
 	/**
 	 * Simulate the number of active occupants in a domestic dwelling for a
 	 * single day at ten-minute intervals.

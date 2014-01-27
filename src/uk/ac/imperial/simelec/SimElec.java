@@ -36,7 +36,7 @@ import java.io.IOException;
 public class SimElec {
 
 	private int month;
-	private int nResidents;
+	private int residents;
 	private boolean weekend;
 	private String output_dir;
 
@@ -98,7 +98,7 @@ public class SimElec {
 
 		// Set the inputs cleaning as necessary
 		this.month = validateMonth(month);
-		this.setResidents(residents);
+		this.residents = validateResidents(residents);
 		this.weekend = weekend;
 		this.output_dir = output_dir;
 	}
@@ -120,15 +120,29 @@ public class SimElec {
 			return (1);
 		}
 	}
-	
-	public void setResidents(int residents) {
+
+	/**
+	 * Validate the number of residents to simulation.
+	 * 
+	 * @param residents
+	 *            an int giving the number of residents to simulate
+	 * 
+	 * @return the specified value if >=1 and <=5. If greater than 5, returns 5.
+	 *         If less than 1, returns 1.
+	 */
+	public static int validateResidents(int residents) {
 		if (residents >= 1 && residents <= 5) {
-			this.nResidents = residents;
+			return (residents);
+		} else if (residents < 1) {
+			System.out
+					.printf("%d residents specified, only 1 to 5 supported. Defaulting to 1.%n",
+							residents);
+			return (1);
 		} else {
 			System.out
-					.printf("%d residents specified, only 1 to 5 supported. Defaulting to 2.%n",
+					.printf("%d residents specified, only 1 to 5 supported. Defaulting to 5.%n",
 							residents);
-			this.nResidents = 2;
+			return (5);
 		}
 	}
 
@@ -139,7 +153,7 @@ public class SimElec {
 	 */
 	public void run() throws IOException {
 
-		OccupancyModel occ = new OccupancyModel(nResidents, weekend, output_dir);
+		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
 		occ.RunOccupancySimulation();
 		LightingModel lights = new LightingModel(month, output_dir);
 		lights.RunLightingSimulation();
