@@ -48,6 +48,12 @@ public class OccupancyModel {
 	private int nResidents;
 	private boolean weekend;
 	private String out_dir;
+	
+	// Data variables
+	// TODO make these resources
+	private static String start_states_weekend = "data/occ_start_states_weekend.csv";
+	private static String start_states_weekday = "data/occ_start_states_weekday.csv";
+	private static String template = "data/tpm_%d_%s.csv";
 
 	/**
 	 * Simulates the number of active occupants within a household for a single
@@ -133,9 +139,7 @@ public class OccupancyModel {
 		// 00:10
 
 		// Load in the start state data from occ_start_states
-		// TODO convert these into resources
-		String filename = weekend ? "data/occ_start_states_weekend.csv"
-				: "data/occ_start_states_weekday.csv";
+		String filename = weekend ? start_states_weekend : start_states_weekday; 				
 		CSVReader reader = new CSVReader(new FileReader(filename), ',', '\'', 2);
 		List<String[]> myEntries = reader.readAll();
 		double[] vector = new double[myEntries.size()]; // vector = n rows
@@ -152,8 +156,7 @@ public class OccupancyModel {
 		// Step 3: Determine the active occupancy transitions for each ten
 		// minute period of the day.
 
-		// First load in the correct file
-		String template = "data/tpm_%d_%s.csv";
+		// First load in the correct file		
 		filename = String.format(template, nResidents, weekend ? "weekend"
 				: "weekday");
 		reader = new CSVReader(new FileReader(filename), ',', '\'', 1);

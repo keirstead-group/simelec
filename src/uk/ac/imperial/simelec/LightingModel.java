@@ -54,6 +54,11 @@ public class LightingModel {
 	private String out_dir;
 	private String occupancy_file = "occupancy_output.csv";
 
+	// Data files
+	// TODO convert to resources
+	private static String irradiance_file = "data/irradiance.csv";
+	private static String bulbs_file = "data/bulbs.csv";
+		
 	/**
 	 * Create a LightingModel for a specified month and output directory
 	 * 
@@ -253,8 +258,7 @@ public class LightingModel {
 	private List<Bulb> getBulbs() throws IOException {
 
 		// Load in the raw data
-		// TODO convert to a resource path
-		CSVReader reader = new CSVReader(new FileReader("data/bulbs.csv"), ',',
+		CSVReader reader = new CSVReader(new FileReader(bulbs_file), ',',
 				'\'', 10);
 		List<String[]> myEntries = reader.readAll();
 
@@ -301,8 +305,7 @@ public class LightingModel {
 	 */
 	private int[] getIrradianceData(int month) throws IOException {
 
-		// TODO convert to a resource path
-		CSVReader reader = new CSVReader(new FileReader("data/irradiance.csv"),
+		CSVReader reader = new CSVReader(new FileReader(irradiance_file),
 				',', '\'', 8);
 		List<String[]> myEntries = reader.readAll();
 
