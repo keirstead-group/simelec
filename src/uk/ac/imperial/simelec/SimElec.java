@@ -161,7 +161,7 @@ public class SimElec {
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
 		occ.run();
 		LightingModel lights = new LightingModel(month, output_dir);
-		lights.RunLightingSimulation();
+		lights.run();
 		ApplianceModel appliances = new ApplianceModel(month, weekend,
 				output_dir);
 		appliances.RunApplianceSimulation();
