@@ -81,9 +81,10 @@ public class SimElec {
 			output_dir = ".";
 		}
 
-		System.out.println("Running simulation...");
+		System.out.println("Running SimElec...");
 		SimElec model = new SimElec(month, residents, weekend, output_dir);
 		model.run();
+		System.out.printf("Complete.  Results can be found in '%s'%n", output_dir);
 	}
 
 	/**

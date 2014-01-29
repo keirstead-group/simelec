@@ -130,6 +130,8 @@ public class OccupancyModel {
 	 */
 	public void run() throws IOException {
 
+		System.out.print("Running occupancy model...");
+		
 		// Ensure the output directory exists
 		File dir = new File(this.out_dir);
 		if (!dir.isDirectory())
@@ -195,6 +197,7 @@ public class OccupancyModel {
 		writer.writeAll(results);
 		writer.close();
 
+		System.out.println("done.");
 	}
 
 }

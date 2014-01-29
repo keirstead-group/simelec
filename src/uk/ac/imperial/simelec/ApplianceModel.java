@@ -134,6 +134,8 @@ public class ApplianceModel {
 	 */
 	public void run() throws IOException {
 
+		System.out.print("Running appliance model...");
+		
 		File occupancy_file = new File(out_dir, this.occupancy_file);
 		int[] occupancy = LightingModel.getOccupancy(occupancy_file.getPath());
 
@@ -350,6 +352,7 @@ public class ApplianceModel {
 		writer.writeAll(final_vals);
 		writer.close();
 
+		System.out.println("done.");
 	}
 
 	/**
