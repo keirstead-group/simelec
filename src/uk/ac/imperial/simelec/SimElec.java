@@ -164,7 +164,7 @@ public class SimElec {
 		lights.run();
 		ApplianceModel appliances = new ApplianceModel(month, weekend,
 				output_dir);
-		appliances.RunApplianceSimulation();
+		appliances.run();
 
 	}
 

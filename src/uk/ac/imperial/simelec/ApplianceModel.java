@@ -37,40 +37,83 @@ import java.util.List;
 import java.util.Map;
 
 import cern.jet.random.Uniform;
+import cern.jet.random.engine.MersenneTwister;
+import cern.jet.random.engine.RandomEngine;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
+/**
+ * Simulates the electricity demand for appliances in a household.
+ * 
+ * @author jkeirste
+ * 
+ */
 public class ApplianceModel {
 
+	// Class variables
 	private int month;
 	private boolean weekend;
 	private String out_dir;
 	private String occupancy_file = "occupancy_output.csv";
 	private File out_file;
-	
+
+	// Data files
+	// TODO Make these resources
 	private static String activity_file = "data/activities.csv";
 	private static String appliance_file = "data/appliances.csv";
 
 	// Define the relative monthly temperatures
 	// Data derived from MetOffice temperature data for the Midlands in 2007
 	// (http://www.metoffice.gov.uk/climate/uk/2007/) Crown Copyright
-	private double[] oMonthlyRelativeTemperatureModifier = { 1.63, 1.821,
-			1.595, 0.867, 0.763, 0.191, 0.156, 0.087, 0.399, 0.936, 1.561,
-			1.994 };
+	private static double[] oMonthlyRelativeTemperatureModifier = { 1.63,
+			1.821, 1.595, 0.867, 0.763, 0.191, 0.156, 0.087, 0.399, 0.936,
+			1.561, 1.994 };
 
 	/**
+	 * 
+	 * Simulate the electricity demand from appliances for a household.
+	 * 
 	 * @param args
+	 *            takes three arguments, plus one option. The first is an int
+	 *            giving the month to simulate (1-12), the second is a
+	 *            two-letter code indicating weekend (<code>we</code>) or
+	 *            weekday (<code>wd</code>), and the third is a String giving
+	 *            the output directory. The optional fourth argument is an int
+	 *            giving a random number seed.
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		ApplianceModel model = new ApplianceModel(1, false, ".");
-		model.RunApplianceSimulation();
+
+		int month = 1;
+		boolean weekend = false;
+		String dir = ".";
+
+		// Check arguments
+		if (args.length == 3 || args.length == 4) {
+			month = Integer.valueOf(args[0]);
+			weekend = args[1].equals("we") ? true : false;
+			dir = args[2];
+
+			if (args.length == 4)
+				ApplianceModel.setSeed(Integer.valueOf(args[3]));
+		} else {
+			System.out.printf(
+					"%d arguments detected.  Using default arguments.%n",
+					args.length);
+		}
+
+		ApplianceModel model = new ApplianceModel(month, weekend, dir);
+		model.run();
 	}
-	
+
 	/**
+	 * 
+	 * Create an ApplianceModel with a specified month, weekday, and output
+	 * directory.
+	 * 
 	 * @param month
-	 *            an integer giving the month of the year to simulate
+	 *            an integer giving the month of the year to simulate (1-12)
 	 * @param weekend
 	 *            a boolean indicating whether to simulate a weekend
 	 *            <code>true</code> or weekday <code>false</code>
@@ -82,19 +125,17 @@ public class ApplianceModel {
 		this.weekend = weekend;
 		this.out_dir = dir;
 		this.out_file = new File(out_dir, "appliance_output.csv");
-	}	
-
-
+	}
 
 	/**
 	 * Run the appliance electricity demand simulation.
 	 * 
 	 * @throws IOException
 	 */
-	public void RunApplianceSimulation() throws IOException {
+	public void run() throws IOException {
 
 		File occupancy_file = new File(out_dir, this.occupancy_file);
-		int[] occupancy = LightingModel.getOccupancy(occupancy_file.getPath());		
+		int[] occupancy = LightingModel.getOccupancy(occupancy_file.getPath());
 
 		// Load in the basic data
 		List<ProbabilityModifier> activities = loadActivityStatistics();
@@ -311,25 +352,54 @@ public class ApplianceModel {
 
 	}
 
+	/**
+	 * Gets a ProbabilityModifier with a specified characteristics from a list.
+	 * 
+	 * @param activities
+	 *            a List of all ProbabilityModifier objects
+	 * @param weekend
+	 *            a boolean indicating whether to to find weekend
+	 *            <code>true</code> or weekday <code>false</code> modifiers.
+	 * @param occupants
+	 *            an int giving the number of active occupants that should be in
+	 *            the ProbabilityModifier.
+	 * @param id
+	 *            a String giving an identifier.
+	 * @return a ProbabilityModifier matching all of the specified arguments. If
+	 *         none found, then returns <code>null</code>
+	 */
 	private ProbabilityModifier getProbabilityModifier(
 			List<ProbabilityModifier> activities, boolean weekend,
-			int iActiveOccupants, String use_profile) {
+			int occupants, String id) {
 
 		for (ProbabilityModifier pm : activities) {
 			if (pm.isWeekend == weekend
-					&& pm.active_occupant_count == iActiveOccupants
-					&& pm.ID.equals(use_profile)) {
+					&& pm.active_occupant_count == occupants
+					&& pm.ID.equals(id)) {
 				return (pm);
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Randomly assign ownership for appliances.
+	 * 
+	 * @param apps
+	 *            a List of Appliance objects.
+	 */
 	private void configure_appliances(List<Appliance> apps) {
 		for (Appliance a : apps)
 			a.assign_ownership();
 	}
 
+	/**
+	 * Loads the activity statistics from a file.
+	 * 
+	 * @return a List of ProbabilityModifier objects describing each activity.
+	 * 
+	 * @throws IOException
+	 */
 	private List<ProbabilityModifier> loadActivityStatistics()
 			throws IOException {
 		CSVReader reader = new CSVReader(new FileReader(
@@ -355,6 +425,13 @@ public class ApplianceModel {
 
 	}
 
+	/**
+	 * Load the appliances from a file.
+	 * 
+	 * @return a List of Appliance objects
+	 * 
+	 * @throws IOException
+	 */
 	private List<Appliance> loadAppliances() throws IOException {
 		CSVReader reader = new CSVReader(new FileReader(
 				ApplianceModel.appliance_file), ',', '\'', 37);
@@ -373,20 +450,49 @@ public class ApplianceModel {
 		return (results);
 	}
 
+	/**
+	 * Describes a factor used to modify the probability of an appliance
+	 * running. Each modifier contains a vector of doubles which describes the
+	 * proportion of households where at least one occupant is engaged in a
+	 * particular activity during a particular ten minute period
+	 *  
+	 * @author jkeirste
+	 * 
+	 */
 	private class ProbabilityModifier {
 
+		// Class variables
 		boolean isWeekend;
 		int active_occupant_count;
 		String ID;
 		double[] modifiers = new double[144];
 
-		private ProbabilityModifier(boolean b, int i, String s) {
-			this.isWeekend = b;
-			this.active_occupant_count = i;
-			this.ID = s;
+		/**
+		 * Create a ProbabilityModified with specified parameters.
+		 * 
+		 * @param weekend
+		 *            does this apply to a weekend? <code>true</code>
+		 * @param occupants
+		 *            an int giving the number of active occupants
+		 * @param id
+		 *            a String giving an identifier
+		 */
+		private ProbabilityModifier(boolean weekend, int occupants, String id) {
+			this.isWeekend = weekend;
+			this.active_occupant_count = occupants;
+			this.ID = id;
 		}
 	}
 
-	
-	
+	/**
+	 * Sets the seed for the random number generator.
+	 * 
+	 * @param seed
+	 *            an int giving the seed
+	 */
+	public static void setSeed(int seed) {
+		// TODO verify that this works for the Normal draws as well
+		RandomEngine engine = new MersenneTwister(seed);
+		Uniform.staticSetRandomEngine(engine);
+	}
 }
