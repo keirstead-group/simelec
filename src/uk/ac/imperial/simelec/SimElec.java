@@ -49,9 +49,11 @@ public class SimElec {
 	 *            numeral giving the number of residents in the household, the
 	 *            third a two-letter code indicating whether to simulate a
 	 *            weekend ('we') or weekday ('wd'), and a String giving the
-	 *            output directory. If the arguments are not specified, the
-	 *            default simulation is for a two-person household on a weekday
-	 *            in January with the files written in the current directory.
+	 *            output directory. An optional fifth argument can be specified,
+	 *            an int giving a random number seed. If the arguments are not
+	 *            specified, the default simulation is for a two-person
+	 *            household on a weekday in January with the files written in
+	 *            the current directory.
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
@@ -61,11 +63,14 @@ public class SimElec {
 		boolean weekend;
 		String output_dir;
 
-		if (args.length == 4) {
+		if (args.length == 4 || args.length==5) {
 			month = Integer.valueOf(args[0]);
 			residents = Integer.valueOf(args[1]);
 			weekend = args[2].equals("we") ? true : false;
 			output_dir = args[3];
+			
+			if (args.length==5) SimElec.setSeed(Integer.valueOf(args[4]));
+			
 		} else {
 			System.out.printf(
 					"%d arguments detected.  Using default arguments.%n",
@@ -154,12 +159,22 @@ public class SimElec {
 	public void run() throws IOException {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
-		occ.RunOccupancySimulation();
+		occ.run();
 		LightingModel lights = new LightingModel(month, output_dir);
 		lights.RunLightingSimulation();
 		ApplianceModel appliances = new ApplianceModel(month, weekend,
 				output_dir);
 		appliances.RunApplianceSimulation();
 
+	}
+
+	/**
+	 * Sets the seed for the random number generator used by SimElec.
+	 * 
+	 * @param seed
+	 *            an int giving the seed
+	 */
+	public static void setSeed(int seed) {
+		DiscretePDF.setSeed(seed);
 	}
 }
