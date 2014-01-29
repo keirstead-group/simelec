@@ -114,7 +114,7 @@ public class OccupancyModel {
 				: "data/occ_start_states_weekday.csv";
 		CSVReader reader = new CSVReader(new FileReader(filename), ',', '\'', 2);
 		List<String[]> myEntries = reader.readAll();
-		float[] vector = new float[myEntries.size()]; // vector = n rows
+		double[] vector = new double[myEntries.size()]; // vector = n rows
 		int j = 0;
 		for (String[] s : myEntries) {
 			vector[j] = Float.valueOf(s[nResidents]);
@@ -122,7 +122,8 @@ public class OccupancyModel {
 		}
 
 		// Draw from the cumulative distribution
-		int initialState = draw_from_pdf(vector);
+		DiscretePDF pdf = new DiscretePDF(vector);
+		int initialState = pdf.getRandomIndex();
 
 		// Step 3: Determine the active occupancy transitions for each ten
 		// minute period of the day.
@@ -147,13 +148,14 @@ public class OccupancyModel {
 			String[] row = myEntries.get(rowID);
 
 			// Grab the vector of transition probabilities
-			vector = new float[row.length - 2];
+			vector = new double[row.length - 2];
 			for (int i = 2; i < row.length - 2; i++) {
 				vector[i - 2] = Float.valueOf(row[i]);
 			}
 
 			// Draw for the probability
-			int newState = draw_from_pdf(vector);
+			pdf = new DiscretePDF(vector);
+			int newState = pdf.getRandomIndex();
 
 			String[] tmp2 = { String.valueOf(t + 1), String.valueOf(newState) };
 			results.add(tmp2);
@@ -168,44 +170,6 @@ public class OccupancyModel {
 
 	}
 
-	/**
-	 * Draws from a probability density function.
-	 * 
-	 * @param pdf
-	 *            a vector of floats giving the probability density function
-	 * @return an integer giving the index of the selected interval
-	 */
-	private int draw_from_pdf(float[] pdf) {
 
-		// Draw the value
-		float rand = (float) Uniform.staticNextDouble();
-
-		// Initialize the loop
-		int interval = 0;
-		do {
-			if (rand <= cumsum(pdf)[interval])
-				break;
-			interval++;
-		} while (interval < pdf.length);
-
-		return (interval);
-	}
-
-	/**
-	 * Calculates the cumulative sum of a vector
-	 * 
-	 * @param vector
-	 *            a vector of float values
-	 * @return a vector of float values
-	 */
-	private float[] cumsum(float[] vector) {
-		float[] empty = new float[vector.length];
-		float prev = 0f;
-		for (int i = 0; i < empty.length; i++) {
-			empty[i] = prev + vector[i];
-			prev = empty[i];
-		}
-		return (empty);
-	}
 
 }
