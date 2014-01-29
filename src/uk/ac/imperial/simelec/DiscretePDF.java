@@ -1,6 +1,8 @@
 package uk.ac.imperial.simelec;
 
 import cern.jet.random.Uniform;
+import cern.jet.random.engine.MersenneTwister;
+import cern.jet.random.engine.RandomEngine;
 
 /**
  * Describes a discrete probability density function
@@ -100,7 +102,16 @@ public class DiscretePDF {
 		return values;
 	}
 
-
+	/**
+	 * Sets the seed for the random number generator.
+	 * 
+	 * @param seed
+	 *            an int giving the seed
+	 */
+	public static void setSeed(int seed) {
+		RandomEngine engine = new MersenneTwister(seed);
+		Uniform.staticSetRandomEngine(engine);
+	}
 	
 	
 }
