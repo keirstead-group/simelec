@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,12 +49,11 @@ public class OccupancyModel {
 	private int nResidents;
 	private boolean weekend;
 	private String out_dir;
-	
+
 	// Data variables
-	// TODO make these resources
-	private static String start_states_weekend = "data/occ_start_states_weekend.csv";
-	private static String start_states_weekday = "data/occ_start_states_weekday.csv";
-	private static String template = "data/tpm_%d_%s.csv";
+	private static String start_states_weekend = "/data/occ_start_states_weekend.csv";
+	private static String start_states_weekday = "/data/occ_start_states_weekday.csv";
+	private static String template = "/data/tpm_%d_%s.csv";
 
 	/**
 	 * Simulates the number of active occupants within a household for a single
@@ -75,11 +75,11 @@ public class OccupancyModel {
 		String output_dir;
 
 		// Check the inputs
-		if (args.length == 3 || args.length==4) {
+		if (args.length == 3 || args.length == 4) {
 			residents = Integer.valueOf(args[0]);
 			weekend = args[1].equals("we") ? true : false;
 			output_dir = args[2];
-			if (args.length==4) {
+			if (args.length == 4) {
 				DiscretePDF.setSeed(Integer.valueOf(args[3]));
 			}
 		} else {
@@ -131,7 +131,7 @@ public class OccupancyModel {
 	public void run() throws IOException {
 
 		System.out.print("Running occupancy model...");
-		
+
 		// Ensure the output directory exists
 		File dir = new File(this.out_dir);
 		if (!dir.isDirectory())
@@ -141,8 +141,10 @@ public class OccupancyModel {
 		// 00:10
 
 		// Load in the start state data from occ_start_states
-		String filename = weekend ? start_states_weekend : start_states_weekday; 				
-		CSVReader reader = new CSVReader(new FileReader(filename), ',', '\'', 2);
+		String filename = weekend ? start_states_weekend : start_states_weekday;
+		URL url = this.getClass().getResource(filename);
+		File f = new File(url.getPath());
+		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 2);
 		List<String[]> myEntries = reader.readAll();
 		double[] vector = new double[myEntries.size()]; // vector = n rows
 		int j = 0;
@@ -158,10 +160,12 @@ public class OccupancyModel {
 		// Step 3: Determine the active occupancy transitions for each ten
 		// minute period of the day.
 
-		// First load in the correct file		
+		// First load in the correct file
 		filename = String.format(template, nResidents, weekend ? "weekend"
 				: "weekday");
-		reader = new CSVReader(new FileReader(filename), ',', '\'', 1);
+		url = this.getClass().getResource(filename);
+		f = new File(url.getPath());
+		reader = new CSVReader(new FileReader(f), ',', '\'', 1);
 		myEntries = reader.readAll();
 
 		// Create a list to save the results

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,9 +56,8 @@ public class LightingModel {
 	private String occupancy_file = "occupancy_output.csv";
 
 	// Data files
-	// TODO convert to resources
-	private static String irradiance_file = "data/irradiance.csv";
-	private static String bulbs_file = "data/bulbs.csv";
+	private static String irradiance_file = "/data/irradiance.csv";
+	private static String bulbs_file = "/data/bulbs.csv";
 		
 	/**
 	 * Create a LightingModel for a specified month and output directory
@@ -261,7 +261,9 @@ public class LightingModel {
 	private List<Bulb> getBulbs() throws IOException {
 
 		// Load in the raw data
-		CSVReader reader = new CSVReader(new FileReader(bulbs_file), ',',
+		URL url = this.getClass().getResource(bulbs_file);
+		File f = new File(url.getPath());
+		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()), ',',
 				'\'', 10);
 		List<String[]> myEntries = reader.readAll();
 
@@ -308,7 +310,9 @@ public class LightingModel {
 	 */
 	private int[] getIrradianceData(int month) throws IOException {
 
-		CSVReader reader = new CSVReader(new FileReader(irradiance_file),
+		URL url = this.getClass().getResource(irradiance_file);
+		File f = new File(url.getPath());
+		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()),
 				',', '\'', 8);
 		List<String[]> myEntries = reader.readAll();
 

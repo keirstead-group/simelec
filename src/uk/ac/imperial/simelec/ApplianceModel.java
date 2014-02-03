@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -59,9 +60,8 @@ public class ApplianceModel {
 	private File out_file;
 
 	// Data files
-	// TODO Make these resources
-	private static String activity_file = "data/activities.csv";
-	private static String appliance_file = "data/appliances.csv";
+	private static String activity_file = "/data/activities.csv";
+	private static String appliance_file = "/data/appliances.csv";
 
 	// Define the relative monthly temperatures
 	// Data derived from MetOffice temperature data for the Midlands in 2007
@@ -135,7 +135,7 @@ public class ApplianceModel {
 	public void run() throws IOException {
 
 		System.out.print("Running appliance model...");
-		
+
 		File occupancy_file = new File(out_dir, this.occupancy_file);
 		int[] occupancy = LightingModel.getOccupancy(occupancy_file.getPath());
 
@@ -405,8 +405,9 @@ public class ApplianceModel {
 	 */
 	private List<ProbabilityModifier> loadActivityStatistics()
 			throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(
-				ApplianceModel.activity_file), ',', '\'', 6);
+		URL url = this.getClass().getResource(activity_file);
+		File f = new File(url.getPath());
+		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 6);
 		List<String[]> activities = reader.readAll();
 
 		List<ProbabilityModifier> result = new ArrayList<ProbabilityModifier>();
@@ -436,8 +437,10 @@ public class ApplianceModel {
 	 * @throws IOException
 	 */
 	private List<Appliance> loadAppliances() throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(
-				ApplianceModel.appliance_file), ',', '\'', 37);
+
+		URL url = this.getClass().getResource(appliance_file);
+		File f = new File(url.getPath());
+		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 37);
 		List<String[]> appliances = reader.readAll();
 
 		List<Appliance> results = new ArrayList<Appliance>();
@@ -458,7 +461,7 @@ public class ApplianceModel {
 	 * running. Each modifier contains a vector of doubles which describes the
 	 * proportion of households where at least one occupant is engaged in a
 	 * particular activity during a particular ten minute period
-	 *  
+	 * 
 	 * @author jkeirste
 	 * 
 	 */
