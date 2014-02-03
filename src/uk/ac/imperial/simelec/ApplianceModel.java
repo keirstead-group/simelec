@@ -348,7 +348,7 @@ public class ApplianceModel {
 		}
 
 		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file));
+		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file), ',', '\0');
 		writer.writeAll(final_vals);
 		writer.close();
 

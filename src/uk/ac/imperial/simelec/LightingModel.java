@@ -189,7 +189,7 @@ public class LightingModel {
 
 		// Save the result to a CSV file
 		File outputFile = new File(out_dir, "lighting_output.csv");
-		CSVWriter writer = new CSVWriter(new FileWriter(outputFile));
+		CSVWriter writer = new CSVWriter(new FileWriter(outputFile), ',', '\0');
 		writer.writeAll(results);
 		writer.close();
 
