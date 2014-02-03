@@ -134,10 +134,10 @@ public class ApplianceModel {
 	 */
 	public void run() throws IOException {
 
-		System.out.print("Running appliance model...");
+		// System.out.print("Running appliance model...");
 
 		File occupancy_file = new File(out_dir, this.occupancy_file);
-		int[] occupancy = LightingModel.getOccupancy(occupancy_file.getPath());
+		int[] occupancy = LightingModel.getOccupancy(occupancy_file);
 
 		// Load in the basic data
 		List<ProbabilityModifier> activities = loadActivityStatistics();
@@ -348,11 +348,12 @@ public class ApplianceModel {
 		}
 
 		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file), ',', '\0');
+		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file), ',',
+				'\0');
 		writer.writeAll(final_vals);
 		writer.close();
 
-		System.out.println("done.");
+		// System.out.println("done.");
 	}
 
 	/**

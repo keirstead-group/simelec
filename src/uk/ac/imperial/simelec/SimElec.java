@@ -39,7 +39,8 @@ public class SimElec {
 	private int residents;
 	private boolean weekend;
 	private String output_dir;
-
+	private boolean run_occupancy = true;
+	
 	/**
 	 * Run the simulation.
 	 * 
@@ -159,8 +160,10 @@ public class SimElec {
 	 */
 	public void run() throws IOException {
 
-		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
-		occ.run();
+		if (run_occupancy) {
+			OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
+			occ.run();
+		}
 		LightingModel lights = new LightingModel(month, output_dir);
 		lights.run();
 		ApplianceModel appliances = new ApplianceModel(month, weekend,
@@ -177,5 +180,9 @@ public class SimElec {
 	 */
 	public static void setSeed(int seed) {
 		DiscretePDF.setSeed(seed);
+	}
+
+	public void runOccupancy(boolean b) {
+		this.run_occupancy = b;		
 	}
 }

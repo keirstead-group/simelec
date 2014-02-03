@@ -58,7 +58,7 @@ public class LightingModel {
 	// Data files
 	private static String irradiance_file = "/data/irradiance.csv";
 	private static String bulbs_file = "/data/bulbs.csv";
-		
+
 	/**
 	 * Create a LightingModel for a specified month and output directory
 	 * 
@@ -90,12 +90,13 @@ public class LightingModel {
 		int month;
 		String dir;
 
-		if (args.length == 2 || args.length == 4 || args.length==5) {
+		if (args.length == 2 || args.length == 4 || args.length == 5) {
 			month = Integer.valueOf(args[0]);
 			dir = args[1];
-			
-			if (args.length==5) LightingModel.setSeed(Integer.valueOf(args[4]));
-			
+
+			if (args.length == 5)
+				LightingModel.setSeed(Integer.valueOf(args[4]));
+
 		} else {
 			System.out.printf(
 					"%d arguments detected.  Using default arguments.%n",
@@ -123,8 +124,8 @@ public class LightingModel {
 	 */
 	public void run() throws IOException {
 
-		System.out.print("Running lighting model...");
-		
+		// System.out.print("Running lighting model...");
+
 		// Ensure the output directory exists
 		File dir = new File(this.out_dir);
 		if (!dir.isDirectory())
@@ -139,7 +140,7 @@ public class LightingModel {
 		int[] irradiance = getIrradianceData(month);
 
 		File occupancy_file = new File(out_dir, this.occupancy_file);
-		int[] occupancy = getOccupancy(occupancy_file.getPath());
+		int[] occupancy = getOccupancy(occupancy_file);
 
 		// Main simulation loop
 		// for each bulb in the household
@@ -193,7 +194,7 @@ public class LightingModel {
 		writer.writeAll(results);
 		writer.close();
 
-		System.out.println("done.");
+		// System.out.println("done.");
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class LightingModel {
 	 * @return
 	 * @throws IOException
 	 */
-	static int[] getOccupancy(String file) throws IOException {
+	static int[] getOccupancy(File file) throws IOException {
 		CSVReader reader = new CSVReader(new FileReader(file));
 		List<String[]> myEntries = reader.readAll();
 		int[] result = new int[myEntries.size()];
@@ -263,8 +264,8 @@ public class LightingModel {
 		// Load in the raw data
 		URL url = this.getClass().getResource(bulbs_file);
 		File f = new File(url.getPath());
-		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()), ',',
-				'\'', 10);
+		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()),
+				',', '\'', 10);
 		List<String[]> myEntries = reader.readAll();
 
 		// Choose a random house
