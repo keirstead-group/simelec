@@ -376,6 +376,10 @@ public class ApplianceModel {
 			List<ProbabilityModifier> activities, boolean weekend,
 			int occupants, String id) {
 
+		// TODO for six person households, is the best thing just to pretend
+		// that there are five people there?
+		occupants = SimElec.validateResidents(occupants);
+		
 		for (ProbabilityModifier pm : activities) {
 			if (pm.isWeekend == weekend
 					&& pm.active_occupant_count == occupants
