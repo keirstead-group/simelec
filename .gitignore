@@ -31,3 +31,7 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+## Ignore test R outputs
+R/*.png
+*_output.csv
