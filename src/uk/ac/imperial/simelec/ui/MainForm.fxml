@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="360.0" prefWidth="510.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="uk.ac.imperial.simelec.ui.MainForm">
+<children><GridPane layoutX="15.0" layoutY="14.0" prefHeight="169.0" prefWidth="462.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
+  <columnConstraints>
+    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="143.0" minWidth="120.0" prefWidth="143.0" />
+    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="246.0" minWidth="10.0" prefWidth="209.0" />
+<ColumnConstraints hgrow="SOMETIMES" maxWidth="194.0" minWidth="10.0" prefWidth="150.0" />
+  </columnConstraints>
+  <rowConstraints>
+<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+<children><Label layoutX="20.0" layoutY="50.0" text="Number of residents" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="1" /><ChoiceBox fx:id="cbxResidents" layoutX="167.0" layoutY="46.0" prefHeight="25.0" prefWidth="110.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" /><ChoiceBox fx:id="cbxMonth" layoutX="167.0" layoutY="80.5" prefHeight="25.0" prefWidth="110.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" /><Label layoutX="22.0" layoutY="76.0" text="Month" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="2" /><Label layoutX="22.0" layoutY="103.0" text="Day of week" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="3" /><ChoiceBox fx:id="cbxDayOfWeek" layoutX="167.0" layoutY="123.0" prefHeight="25.0" prefWidth="110.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" /><Label layoutX="27.0" layoutY="166.0" text="Output directory" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="4" /><TextField fx:id="txfOutdir" layoutX="213.5048828125" layoutY="16.5" prefHeight="25.0" prefWidth="200.0" promptText="type path or select button" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4" /><Button fx:id="btnOutdir" layoutX="367.0" layoutY="244.0" mnemonicParsing="false" text="Select directory..." GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+<GridPane.margin>
+<Insets left="5.0" />
+</GridPane.margin></Button><Label layoutX="23.0" layoutY="22.0" text="Input parameters" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
+<font>
+<Font name="System Bold" size="12.0" />
+</font></Label>
+</children>
+</GridPane><HBox layoutX="20.0" layoutY="220.0" prefHeight="134.0" prefWidth="447.0">
+<children><VBox layoutX="14.0" layoutY="231.0" prefHeight="112.0" prefWidth="213.0" spacing="10.0">
+<children><Label layoutX="31.0" layoutY="254.5" text="Model options" AnchorPane.leftAnchor="20.0">
+<font>
+<Font name="System Bold" size="12.0" />
+</font>
+<VBox.margin>
+<Insets />
+</VBox.margin>
+</Label><CheckBox fx:id="chbLighting" layoutX="33.2890625" layoutY="286.5" mnemonicParsing="false" selected="true" text="Run Lighting model?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="1" /><CheckBox fx:id="chbAppliances" layoutX="33.0" layoutY="314.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="152.0" selected="true" text="Run Appliance model?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="2" /><CheckBox fx:id="chbRPlots" layoutX="39.0" layoutY="345.0" mnemonicParsing="false" selected="true" text="Make R plots?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="3" />
+</children></VBox><VBox alignment="CENTER" layoutX="371.0" layoutY="285.0" prefHeight="135.0" prefWidth="205.0" spacing="10.0">
+<children><Button fx:id="btnRunSimElec" alignment="CENTER" layoutX="222.0" layoutY="240.0" mnemonicParsing="false" prefHeight="62.0" prefWidth="131.0" text="Run SimElec">
+<VBox.margin>
+<Insets top="10.0" />
+</VBox.margin></Button><Label fx:id="lblStatus" alignment="CENTER" layoutX="242.0048828125" layoutY="322.5" text=" " />
+</children></VBox>
+</children></HBox>
+</children></AnchorPane>

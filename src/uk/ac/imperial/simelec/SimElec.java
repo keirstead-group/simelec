@@ -39,7 +39,9 @@ public class SimElec {
 	private int residents;
 	private boolean weekend;
 	private String output_dir;
-
+	private boolean runLighting = true;
+	private boolean runAppliances = true;
+	
 	/**
 	 * Run the simulation.
 	 * 
@@ -164,11 +166,16 @@ public class SimElec {
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
 		occ.run();
 
-		LightingModel lights = new LightingModel(month, output_dir, occ);
-		lights.run();
-		ApplianceModel appliances = new ApplianceModel(month, weekend,
-				output_dir, occ);
-		appliances.run();		
+		if (runLighting) {
+			LightingModel lights = new LightingModel(month, output_dir, occ);
+			lights.run();
+		}
+		
+		if (runAppliances) {
+			ApplianceModel appliances = new ApplianceModel(month, weekend,
+					output_dir, occ);
+			appliances.run();
+		}
 
 	}
 
@@ -182,4 +189,21 @@ public class SimElec {
 		DiscretePDF.setSeed(seed);
 	}
 
+	/**
+	 * Set whether to run the Appliance simulation
+	 *  
+	 * @param run 
+	 */
+	public void setRunAppliances(boolean run) {
+		this.runAppliances = run;		
+	}
+
+	/**
+	 * Set whether to run the Lighting simulation
+	 *  
+	 * @param run 
+	 */
+	public void setRunLighting(boolean run) {
+		this.runLighting = run;		
+	}
 }
