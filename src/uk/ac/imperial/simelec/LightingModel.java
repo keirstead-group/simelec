@@ -185,7 +185,7 @@ public class LightingModel {
 
 		ArrayList<String[]> results = new ArrayList<String[]>(bulbs.size());
 		for (Bulb b : bulbs) {
-			results.add(b.to_export_string());
+			results.add(b.toExportString());
 		}
 
 		// Save the result to a CSV file
@@ -278,9 +278,6 @@ public class LightingModel {
 		int nBulbs = Integer.valueOf(data[1]);
 		List<Bulb> bulbs = new ArrayList<Bulb>(nBulbs);
 
-		// This calibration scaler is used to calibrate the model to so that it
-		// provides a particular average output over a large number of runs.
-		float calibration = 0.008153686f;
 
 		// Note that the input data file is a ragged array. To get CSVReader
 		// to work, it has been padded with 0 values for bulb ratings. However
@@ -288,14 +285,8 @@ public class LightingModel {
 		for (int i = 0; i < nBulbs; i++) {
 
 			// Read in the power rating of the bulb
-			int rating = Integer.valueOf(data[2 + i]);
-
-			// Assign a random bulb use weighting to this bulb
-			// Note that the calibration scalar is multiplied here to save
-			// processing time later
-			float fCalibratedRelativeUseWeighting = (float) (-calibration * Math
-					.log(Uniform.staticNextDouble()));
-			Bulb b = new Bulb(i, rating, fCalibratedRelativeUseWeighting);
+			int rating = Integer.valueOf(data[2 + i]);			
+			Bulb b = new Bulb(i, rating);
 			bulbs.add(b);
 		}
 
