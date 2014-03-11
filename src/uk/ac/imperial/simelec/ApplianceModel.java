@@ -163,20 +163,18 @@ public class ApplianceModel {
 					int iTenMinuteCount = (int) Math.floor((time - 1) / 10);
 
 					// Get the number of current active occupants for this
-					// minute
-					// Convert from 10 minute to 1 minute resolution
-					int iActiveOccupants = occupancy[(int) Math
-							.floor((time - 1) / 10)];
+					// minute. Convert from 10 minute to 1 minute resolution
+					int iActiveOccupants = occupancy[iTenMinuteCount];
 
 					// If this appliance is off having completed a cycle (ie. a
 					// restart delay)
-					if (a.isOff() && (a.restart_delay_time_left > 0)) {
+					if (a.isOff() && (a.awaitingRestart())) {
 
 						// Decrement the cycle time left
 						a.restart_delay_time_left--;
 
 					} else if (a.isOff()) {
-						// Else if this appliance is off
+						// Else if this appliance is off but able to restart
 
 						// There must be active occupants, or the profile must
 						// not depend on occupancy for a start event to occur
@@ -200,8 +198,7 @@ public class ApplianceModel {
 										a.use_profile);
 
 								// Get the activity statistics for this profile
-								// Get the probability for this activity profile
-								// for this time step
+								// at this time step
 								dActivityProbability = pm.modifiers[iTenMinuteCount];
 
 							} else if (a.name.equals("ELEC_SPACE_HEATING")) {
@@ -219,6 +216,8 @@ public class ApplianceModel {
 
 								// This is a start event
 								a.start();
+
+								// Once it's on, we need to "run" it too
 								a.run();
 
 							}
@@ -227,13 +226,12 @@ public class ApplianceModel {
 							// Custom appliance handler: storage heaters have a
 							// simple representation
 							// The number of cycles (one per day) set out in the
-							// calibration sheet
-							// is used to determine whether the storage heater
-							// is used
+							// calibration sheet is used to determine whether
+							// the storage heater is used
 
 							// This model does not account for the changes in
-							// the Economy 7 time
-							// It assumes that the time starts at 00:30 each day
+							// the Economy 7 time. It assumes that the time
+							// starts at 00:30 each day
 							if (iTenMinuteCount == 4) { // ie. 00:30 - 00:40
 
 								// Assume January 14th is the coldest day of the
@@ -306,7 +304,7 @@ public class ApplianceModel {
 					}
 
 					// Save the power value
-					a.consumption[time] = (double) a.power;					
+					a.consumption[time] = (double) a.power;
 
 					// Increment the time
 					time++;
@@ -474,9 +472,9 @@ public class ApplianceModel {
 	 * @param seed
 	 *            an int giving the seed
 	 */
-	public static void setSeed(int seed) {
-		// TODO verify that this works for the Normal draws as well
+	public static void setSeed(int seed) {		
+		// This will also apply to the static method of other distributions
 		RandomEngine engine = new MersenneTwister(seed);
-		Uniform.staticSetRandomEngine(engine);
+		Uniform.staticSetRandomEngine(engine);		
 	}
 }

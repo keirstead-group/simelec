@@ -286,12 +286,12 @@ public class Appliance {
 	public boolean isOff() {
 		return (cycle_time_left <= 0);
 	}
-	
+
 	/**
 	 * Converts this Appliance object into a formatted String array for export.
 	 * 
-	 * @return a String array containing the Appliance's name, and then
-	 *         1440 entries representing the consumption in Watts at each minute
+	 * @return a String array containing the Appliance's name, and then 1440
+	 *         entries representing the consumption in Watts at each minute
 	 *         interval.
 	 */
 	public String[] toExportString() {
@@ -300,7 +300,18 @@ public class Appliance {
 		for (int i = 0; i < consumption.length; i++)
 			tmp[i + 1] = String.valueOf(consumption[i]);
 		return tmp;
-		
+
+	}
+
+	/**
+	 * Is this Appliance awaiting restart? In other words, is the value of the
+	 * restart delay current greater than zero?
+	 * 
+	 * @return a boolean <code>true</code> if appliance is still awaiting
+	 *         restart delay to finish
+	 */
+	public boolean awaitingRestart() {
+		return (restart_delay_time_left > 0);
 	}
 
 }
