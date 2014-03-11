@@ -5,15 +5,14 @@ import cern.jet.random.engine.MersenneTwister;
 import cern.jet.random.engine.RandomEngine;
 
 /**
- * Describes a discrete probability density function
+ * Describes a discrete probability density function.
  * 
- * Switch to http://jdistlib.sourceforge.net/ or http://www.jsc.nildram.co.uk/?
- * 
- * @author jkeirste
+ * @author James Keirstead
  *
  */
 public class DiscretePDF {
 
+	// Member fields
 	private double[] values;
 	
 	/**
@@ -28,20 +27,18 @@ public class DiscretePDF {
 		for (int i=0; i<values.length; i++) {
 			this.values[i] = values[i]<0 ? 0 : values[i];			
 		}		
+		
+		this.normalize();
 	}
 	
 	/**
-	 * Normalizes all of the values in this DiscretePDF so that their sum
+	 * Normalizes the values in this DiscretePDF so that their sum
 	 * equals one.
 	 * 
 	 */
-	public void normalize() {
+	protected void normalize() {
 		
-		// Calculate the sum
-		double sum = 0;
-		for (double v : values) {
-			sum = sum + v;
-		}
+		double sum = this.sum();
 		
 		// Do the normalization
 		for (int i = 0; i<values.length; i++) {
@@ -50,11 +47,11 @@ public class DiscretePDF {
 	}
 
 	/**
-	 * Calculates the cumulative distribution of this DiscretePDF.
+	 * Gets the cumulative distribution of this DiscretePDF.
 	 * 
 	 * @return a vector of float values giving the cumulative distribution
 	 */
-	public double[] cumsum() {
+	public double[] getCDF() {
 		
 		// Create a placeholder
 		double[] cumdist = new double[values.length];
@@ -69,34 +66,50 @@ public class DiscretePDF {
 	}
 	
 	/**
-	 * Draws from a discrete probability density function.
+	 * Draw from this DiscretePDF.
 	 * 
 	 * @return an integer giving the index of the selected interval
 	 */
 	public int getRandomIndex() {
 
-		// Normalize the values 
-		this.normalize();
+		if (this.sum()!=1f) {
+			this.normalize();
+		}
 		
-		// Draw the value
+		// Draw a random value value
 		float rand = (float) Uniform.staticNextDouble();
 		
 		// Initialize the loop
 		int interval = 0;
-		double[] cumdist = this.cumsum();
+		double[] cumdist = this.getCDF();
 		do {
 			if (rand <= cumdist[interval])
 				break;
 			interval++;
 		} while (interval < values.length);
 		
-		return (interval);
+		return interval;
+	}
+
+	/**
+	 * Calculate the sum of this DiscretePDF
+	 * 
+	 * @return	a float
+	 */
+	private double sum() {
+		
+		double sum = 0;
+		
+		for (double v : values) {
+			sum = sum + v;
+		}
+		return sum;
 	}
 
 	/**
 	 * Get the values describing this DiscretePDF
 	 * 
-	 * @return
+	 * @return an array of double
 	 */
 	public double[] getValues() {
 		return values;

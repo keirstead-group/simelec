@@ -42,9 +42,9 @@ public class DiscretePDFTest {
 	}
 
 	@Test
-	public void testCumsum() {
+	public void testGetCDF() {
 		pdf.normalize();
-		double[] tmp = pdf.cumsum();
+		double[] tmp = pdf.getCDF();
 		assertEquals(tmp[tmp.length - 1], 1, eps);
 	}
 
@@ -64,7 +64,7 @@ public class DiscretePDFTest {
 		int maxIndex = 0;
 		int minIndex = tmp.length;
 		double prev =0;
-		tmp = pdf.cumsum();
+		tmp = pdf.getCDF();
 		for (int i = 0; i<tmp.length; i++) {
 			if (tmp[i]==0 && prev==0) minIndex=i + 1;
 			if (tmp[i]==1) maxIndex = i;
