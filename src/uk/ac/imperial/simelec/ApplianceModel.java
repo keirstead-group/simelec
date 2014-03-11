@@ -157,14 +157,6 @@ public class ApplianceModel {
 				results.put(a, new double[1440]);
 			} else {
 
-				// Randomly delay the start of appliances that have a restart
-				// delay
-				a.setRestartDelay();
-
-				// Make the rated power variable over a normal distribution to
-				// provide some variation
-				a.setRatedPower();
-
 				// Initialise the daily simulation loop
 				int time = 0;
 				double[] power_vals = new double[1440];
@@ -184,13 +176,12 @@ public class ApplianceModel {
 
 					// If this appliance is off having completed a cycle (ie. a
 					// restart delay)
-					if ((a.cycle_time_left <= 0)
-							&& (a.restart_delay_time_left > 0)) {
+					if (a.isOff() && (a.restart_delay_time_left > 0)) {
 
 						// Decrement the cycle time left
 						a.restart_delay_time_left--;
 
-					} else if (a.cycle_time_left <= 0) {
+					} else if (a.isOff()) {
 						// Else if this appliance is off
 
 						// There must be active occupants, or the profile must
@@ -234,6 +225,7 @@ public class ApplianceModel {
 
 								// This is a start event
 								a.start();
+								a.run();
 
 							}
 						} else if (a.use_profile.equals("CUSTOM")
@@ -292,6 +284,7 @@ public class ApplianceModel {
 
 									// This is a start event
 									a.start();
+									a.run();
 
 								}
 							}
@@ -313,11 +306,7 @@ public class ApplianceModel {
 							// off upon a transition to inactive occupancy.
 						} else {
 
-							// Set the power
-							a.power = a.GetPowerUsage(a.cycle_time_left);
-
-							// Decrement the cycle time left
-							a.cycle_time_left--;
+							a.run();
 
 						}
 					}
@@ -398,7 +387,7 @@ public class ApplianceModel {
 	 */
 	private void configure_appliances(List<Appliance> apps) {
 		for (Appliance a : apps)
-			a.assign_ownership();
+			a.assignOwnership();
 	}
 
 	/**
@@ -450,8 +439,9 @@ public class ApplianceModel {
 		reader.close();
 		List<Appliance> results = new ArrayList<Appliance>();
 		for (String[] s : appliances) {
+			// TODO energy (column 4, s[3]) not used?
 			Appliance a = new Appliance(s[0], s[1], Double.valueOf(s[2]),
-					Double.valueOf(s[3]), Integer.valueOf(s[4]),
+					Integer.valueOf(s[4]),
 					Integer.valueOf(s[5]), Double.valueOf(s[6]),
 					Integer.valueOf(s[7]), Integer.valueOf(s[8]),
 					Double.valueOf(s[9]));
