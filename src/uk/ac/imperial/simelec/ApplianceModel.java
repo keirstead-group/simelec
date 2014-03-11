@@ -6,7 +6,7 @@
     Loughborough University, Leicestershire LE11 3TU, UK
     Tel. +44 1509 635326. Email address: I.W.Richardson@lboro.ac.uk
 
-	Java Implementation (c) 2014 James Keirstead
+	Java implementation (c) 2014 James Keirstead
 	Imperial College London
 	j.keirstead@imperial.ac.uk
 	
@@ -33,26 +33,24 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.MersenneTwister;
 import cern.jet.random.engine.RandomEngine;
-
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * Simulates the electricity demand for appliances in a household.
+ * Simulates the electricity demand for appliances in a household at one-minute
+ * intervals for the course of a single day.
  * 
- * @author jkeirste
+ * @author James Keirstead
  * 
  */
 public class ApplianceModel {
 
-	// Class variables
+	// Member variables
 	private int month;
 	private boolean weekend;
 	private String out_dir;
@@ -72,7 +70,8 @@ public class ApplianceModel {
 
 	/**
 	 * 
-	 * Simulate the electricity demand from appliances for a household.
+	 * Simulate the electricity demand from appliances for a household at
+	 * one-minute intervals for a single day.
 	 * 
 	 * @param args
 	 *            takes three arguments, plus one option. The first is an int
@@ -146,20 +145,15 @@ public class ApplianceModel {
 		// Assign the appliances to households
 		configure_appliances(appliances);
 
-		// Set up a map to hold the results
-		Map<Appliance, double[]> results = new HashMap<Appliance, double[]>();
-
 		// Simulate each appliance
 		for (Appliance a : appliances) {
 
-			if (!a.isOwned()) {
-				// If the appliance isn't present, then store an empty array
-				results.put(a, new double[1440]);
-			} else {
+			// If the appliance is owned, then we simulate it.
+			// If not, it's already stored an array of empty values
+			if (a.isOwned()) {
 
 				// Initialise the daily simulation loop
 				int time = 0;
-				double[] power_vals = new double[1440];
 
 				while (time < 1440) {
 					// Set the default (standby) power demand at this time step
@@ -312,34 +306,24 @@ public class ApplianceModel {
 					}
 
 					// Save the power value
-					power_vals[time] = (double) a.power;
+					a.consumption[time] = (double) a.power;					
 
 					// Increment the time
 					time++;
 				}
-
-				results.put(a, power_vals);
 			}
 		}
 
 		// Write the data back to the simulation sheet
-		ArrayList<String[]> final_vals = new ArrayList<String[]>(
-				appliances.size());
+		ArrayList<String[]> results = new ArrayList<String[]>(appliances.size());
 		for (Appliance a : appliances) {
-			String[] tmp = new String[1440 + 1];
-			double[] data = results.get(a);
-			tmp[0] = a.name;
-
-			for (int i = 0; i < 1440; i++) {
-				tmp[i + 1] = String.valueOf(data[i]);
-			}
-			final_vals.add(tmp);
+			results.add(a.toExportString());
 		}
 
 		// Save the result to a CSV file
 		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file), ',',
 				'\0');
-		writer.writeAll(final_vals);
+		writer.writeAll(results);
 		writer.close();
 
 		// System.out.println("done.");
@@ -368,7 +352,7 @@ public class ApplianceModel {
 		// TODO for six person households, is the best thing just to pretend
 		// that there are five people there?
 		occupants = SimElec.validateResidents(occupants);
-		
+
 		for (ProbabilityModifier pm : activities) {
 			if (pm.isWeekend == weekend
 					&& pm.active_occupant_count == occupants
@@ -441,10 +425,9 @@ public class ApplianceModel {
 		for (String[] s : appliances) {
 			// TODO energy (column 4, s[3]) not used?
 			Appliance a = new Appliance(s[0], s[1], Double.valueOf(s[2]),
-					Integer.valueOf(s[4]),
-					Integer.valueOf(s[5]), Double.valueOf(s[6]),
-					Integer.valueOf(s[7]), Integer.valueOf(s[8]),
-					Double.valueOf(s[9]));
+					Integer.valueOf(s[4]), Integer.valueOf(s[5]),
+					Double.valueOf(s[6]), Integer.valueOf(s[7]),
+					Integer.valueOf(s[8]), Double.valueOf(s[9]));
 			results.add(a);
 		}
 

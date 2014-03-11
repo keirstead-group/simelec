@@ -26,6 +26,7 @@ public class Appliance {
 	private boolean owned = false;
 	private int cycle_time_left = 0;
 	int restart_delay_time_left = 0;
+	protected double[] consumption = new double[1440]; // W
 
 	/**
 	 * Creates a new appliance with specified attributes. The constructor uses
@@ -284,6 +285,22 @@ public class Appliance {
 	 */
 	public boolean isOff() {
 		return (cycle_time_left <= 0);
+	}
+	
+	/**
+	 * Converts this Appliance object into a formatted String array for export.
+	 * 
+	 * @return a String array containing the Appliance's name, and then
+	 *         1440 entries representing the consumption in Watts at each minute
+	 *         interval.
+	 */
+	public String[] toExportString() {
+		String[] tmp = new String[consumption.length + 1];
+		tmp[0] = this.name;
+		for (int i = 0; i < consumption.length; i++)
+			tmp[i + 1] = String.valueOf(consumption[i]);
+		return tmp;
+		
 	}
 
 }
