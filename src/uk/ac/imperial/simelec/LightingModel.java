@@ -240,6 +240,7 @@ public class LightingModel {
 	static int[] getOccupancy(File file) throws IOException {
 		CSVReader reader = new CSVReader(new FileReader(file));
 		List<String[]> myEntries = reader.readAll();
+		reader.close();
 		int[] result = new int[myEntries.size()];
 		for (int i = 0; i < myEntries.size(); i++) {
 			result[i] = Integer.valueOf(myEntries.get(i)[1]);
@@ -267,7 +268,8 @@ public class LightingModel {
 		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()),
 				',', '\'', 10);
 		List<String[]> myEntries = reader.readAll();
-
+		reader.close();
+		
 		// Choose a random house
 		int house = Uniform.staticNextIntFromTo(0, myEntries.size() - 1);
 
@@ -316,7 +318,8 @@ public class LightingModel {
 		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()),
 				',', '\'', 8);
 		List<String[]> myEntries = reader.readAll();
-
+		reader.close();
+		
 		int[] answer = new int[myEntries.size()];
 		for (int i = 0; i < myEntries.size(); i++) {
 			answer[i] = Integer.valueOf(myEntries.get(i)[2 + month]);

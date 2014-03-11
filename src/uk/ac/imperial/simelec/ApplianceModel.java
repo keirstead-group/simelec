@@ -414,7 +414,7 @@ public class ApplianceModel {
 		File f = new File(url.getPath());
 		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 6);
 		List<String[]> activities = reader.readAll();
-
+		reader.close();
 		List<ProbabilityModifier> result = new ArrayList<ProbabilityModifier>();
 		for (String[] s : activities) {
 			boolean weekend = Boolean.valueOf(s[0]);
@@ -447,7 +447,7 @@ public class ApplianceModel {
 		File f = new File(url.getPath());
 		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 37);
 		List<String[]> appliances = reader.readAll();
-
+		reader.close();
 		List<Appliance> results = new ArrayList<Appliance>();
 		for (String[] s : appliances) {
 			Appliance a = new Appliance(s[0], s[1], Double.valueOf(s[2]),

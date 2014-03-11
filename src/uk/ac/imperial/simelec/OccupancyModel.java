@@ -146,13 +146,16 @@ public class OccupancyModel {
 		File f = new File(url.getPath());
 		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 2);
 		List<String[]> myEntries = reader.readAll();
+		reader.close();
+		
 		double[] vector = new double[myEntries.size()]; // vector = n rows
 		int j = 0;
 		for (String[] s : myEntries) {
 			vector[j] = Float.valueOf(s[nResidents]);
 			j++;
 		}
-
+		
+		
 		// Draw from the cumulative distribution
 		DiscretePDF pdf = new DiscretePDF(vector);
 		int initialState = pdf.getRandomIndex();
@@ -167,7 +170,7 @@ public class OccupancyModel {
 		f = new File(url.getPath());
 		reader = new CSVReader(new FileReader(f), ',', '\'', 1);
 		myEntries = reader.readAll();
-
+		reader.close();
 		// Create a list to save the results
 		List<String[]> results = new ArrayList<String[]>(144);
 		String[] tmp = { "1", String.valueOf(initialState) };
