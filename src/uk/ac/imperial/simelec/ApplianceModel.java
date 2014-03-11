@@ -54,8 +54,8 @@ public class ApplianceModel {
 	private int month;
 	private boolean weekend;
 	private String out_dir;
-	private String occupancy_file = "occupancy_output.csv";
 	private File out_file;
+	private OccupancyModel model;
 
 	// Data files
 	private static String activity_file = "/data/activities.csv";
@@ -74,25 +74,32 @@ public class ApplianceModel {
 	 * one-minute intervals for a single day.
 	 * 
 	 * @param args
-	 *            takes three arguments, plus one option. The first is an int
-	 *            giving the month to simulate (1-12), the second is a
-	 *            two-letter code indicating weekend (<code>we</code>) or
-	 *            weekday (<code>wd</code>), and the third is a String giving
-	 *            the output directory. The optional fourth argument is an int
-	 *            giving a random number seed.
+	 *            takes four arguments, plus one option. The first is an int
+	 *            giving the number of residents in the home, the second an int
+	 *            giving the month to simulate (1-12), the third is a two-letter
+	 *            code indicating weekend (<code>we</code>) or weekday (
+	 *            <code>wd</code>), and the fourth is a String giving the output
+	 *            directory. The optional fifth argument is an int giving a
+	 *            random number seed. If these are not specified, the default is
+	 *            to simulate two occupants for a weekday with results saved in
+	 *            the current directory.
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
 
 		int month = 1;
+		int residents = 2;
 		boolean weekend = false;
 		String dir = ".";
+		OccupancyModel occ = new OccupancyModel(residents, weekend, dir);
 
 		// Check arguments
 		if (args.length == 3 || args.length == 4) {
-			month = Integer.valueOf(args[0]);
-			weekend = args[1].equals("we") ? true : false;
-			dir = args[2];
+			residents = Integer.valueOf(args[0]);
+			month = Integer.valueOf(args[1]);
+			weekend = args[2].equals("we") ? true : false;
+			dir = args[3];
+			occ = new OccupancyModel(residents, weekend, dir);
 
 			if (args.length == 4)
 				ApplianceModel.setSeed(Integer.valueOf(args[3]));
@@ -102,7 +109,7 @@ public class ApplianceModel {
 					args.length);
 		}
 
-		ApplianceModel model = new ApplianceModel(month, weekend, dir);
+		ApplianceModel model = new ApplianceModel(month, weekend, dir, occ);
 		model.run();
 	}
 
@@ -118,12 +125,18 @@ public class ApplianceModel {
 	 *            <code>true</code> or weekday <code>false</code>
 	 * @param output_file
 	 *            a string giving the path for the output file
+	 * @param model
+	 *            an OccupancyModel for calculating when people are present in
+	 *            the home
+	 * 
 	 */
-	public ApplianceModel(int month, boolean weekend, String dir) {
+	public ApplianceModel(int month, boolean weekend, String dir,
+			OccupancyModel model) {
 		this.month = SimElec.validateMonth(month);
 		this.weekend = weekend;
 		this.out_dir = dir;
 		this.out_file = new File(out_dir, "appliance_output.csv");
+		this.model = model;
 	}
 
 	/**
@@ -135,8 +148,8 @@ public class ApplianceModel {
 
 		// System.out.print("Running appliance model...");
 
-		File occupancy_file = new File(out_dir, this.occupancy_file);
-		int[] occupancy = LightingModel.getOccupancy(occupancy_file);
+		// Get the occupancy
+		int[] occupancy = model.getOccupancy();
 
 		// Load in the basic data
 		List<ProbabilityModifier> activities = loadActivityStatistics();
@@ -472,9 +485,9 @@ public class ApplianceModel {
 	 * @param seed
 	 *            an int giving the seed
 	 */
-	public static void setSeed(int seed) {		
+	public static void setSeed(int seed) {
 		// This will also apply to the static method of other distributions
 		RandomEngine engine = new MersenneTwister(seed);
-		Uniform.staticSetRandomEngine(engine);		
+		Uniform.staticSetRandomEngine(engine);
 	}
 }

@@ -6,7 +6,7 @@
     Loughborough University, Leicestershire LE11 3TU, UK
     Tel. +44 1509 635326. Email address: I.W.Richardson@lboro.ac.uk
 
-	Java Implementation (c) 2014 James Keirstead
+	Java implementation (c) 2014 James Keirstead
 	Imperial College London
 	j.keirstead@imperial.ac.uk
 	
@@ -30,7 +30,7 @@ import java.io.IOException;
 /**
  * Simulates electricity demand for a single UK household
  * 
- * @author jkeirste
+ * @author James Keirstead
  * 
  */
 public class SimElec {
@@ -39,8 +39,7 @@ public class SimElec {
 	private int residents;
 	private boolean weekend;
 	private String output_dir;
-	private boolean run_occupancy = true;
-	
+
 	/**
 	 * Run the simulation.
 	 * 
@@ -64,14 +63,15 @@ public class SimElec {
 		boolean weekend;
 		String output_dir;
 
-		if (args.length == 4 || args.length==5) {
+		if (args.length == 4 || args.length == 5) {
 			month = Integer.valueOf(args[0]);
 			residents = Integer.valueOf(args[1]);
 			weekend = args[2].equals("we") ? true : false;
 			output_dir = args[3];
-			
-			if (args.length==5) SimElec.setSeed(Integer.valueOf(args[4]));
-			
+
+			if (args.length == 5)
+				SimElec.setSeed(Integer.valueOf(args[4]));
+
 		} else {
 			System.out.printf(
 					"%d arguments detected.  Using default arguments.%n",
@@ -85,7 +85,8 @@ public class SimElec {
 		System.out.println("Running SimElec...");
 		SimElec model = new SimElec(month, residents, weekend, output_dir);
 		model.run();
-		System.out.printf("Complete.  Results can be found in '%s'%n", output_dir);
+		System.out.printf("Complete.  Results can be found in '%s'%n",
+				output_dir);
 	}
 
 	/**
@@ -160,15 +161,14 @@ public class SimElec {
 	 */
 	public void run() throws IOException {
 
-		if (run_occupancy) {
-			OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
-			occ.run();
-		}
-		LightingModel lights = new LightingModel(month, output_dir);
+		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
+		occ.run();
+
+		LightingModel lights = new LightingModel(month, output_dir, occ);
 		lights.run();
 		ApplianceModel appliances = new ApplianceModel(month, weekend,
-				output_dir);
-		appliances.run();
+				output_dir, occ);
+		appliances.run();		
 
 	}
 
@@ -182,7 +182,4 @@ public class SimElec {
 		DiscretePDF.setSeed(seed);
 	}
 
-	public void runOccupancy(boolean b) {
-		this.run_occupancy = b;		
-	}
 }

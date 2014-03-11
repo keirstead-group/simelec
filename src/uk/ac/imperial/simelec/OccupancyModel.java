@@ -49,6 +49,8 @@ public class OccupancyModel {
 	private int nResidents;
 	private boolean weekend;
 	private String out_dir;
+	private File out_file;
+	private boolean has_run = false;
 
 	// Data variables
 	private static String start_states_weekend = "/data/occ_start_states_weekend.csv";
@@ -120,6 +122,7 @@ public class OccupancyModel {
 		this.nResidents = SimElec.validateResidents(residents);
 		this.weekend = weekend;
 		this.out_dir = dir;
+		this.out_file = new File(dir, "occupancy_output.csv");
 	}
 
 	/**
@@ -147,15 +150,14 @@ public class OccupancyModel {
 		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 2);
 		List<String[]> myEntries = reader.readAll();
 		reader.close();
-		
+
 		double[] vector = new double[myEntries.size()]; // vector = n rows
 		int j = 0;
 		for (String[] s : myEntries) {
 			vector[j] = Float.valueOf(s[nResidents]);
 			j++;
 		}
-		
-		
+
 		// Draw from the cumulative distribution
 		DiscretePDF pdf = new DiscretePDF(vector);
 		int initialState = pdf.getRandomIndex();
@@ -199,12 +201,34 @@ public class OccupancyModel {
 		}
 
 		// Save the result to a CSV file
-		File outputFile = new File(dir, "occupancy_output.csv");
-		CSVWriter writer = new CSVWriter(new FileWriter(outputFile), ',', '\0');
+		CSVWriter writer = new CSVWriter(new FileWriter(out_file), ',', '\0');
 		writer.writeAll(results);
 		writer.close();
 
+		has_run = true;
 		// System.out.println("done.");
+	}
+
+	/**
+	 * Retrieves occupancy data calculated by this OccupancyModel.
+	 * 
+	 * @return an array of 144 int values giving the occupancy at ten-minute
+	 *         intervals during the day
+	 * @throws IOException
+	 */
+	public int[] getOccupancy() throws IOException {
+		
+		if (!has_run) this.run();
+		
+		CSVReader reader = new CSVReader(new FileReader(out_file));
+		List<String[]> myEntries = reader.readAll();
+		reader.close();
+		int[] result = new int[myEntries.size()];
+		for (int i = 0; i < myEntries.size(); i++) {
+			result[i] = Integer.valueOf(myEntries.get(i)[1]);
+		}
+
+		return (result);
 	}
 
 }

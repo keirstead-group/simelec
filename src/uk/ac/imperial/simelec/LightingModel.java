@@ -6,7 +6,7 @@
     Loughborough University, Leicestershire LE11 3TU, UK
     Tel. +44 1509 635326. Email address: I.W.Richardson@lboro.ac.uk
 
-	Java Implementation (c) 2014 James Keirstead
+	Java implementation (c) 2014 James Keirstead
 	Imperial College London
 	j.keirstead@imperial.ac.uk
 	
@@ -41,9 +41,10 @@ import cern.jet.random.engine.MersenneTwister;
 import cern.jet.random.engine.RandomEngine;
 
 /**
- * Simulates electricity demand for lighting in a household.
+ * Simulates electricity demand for lighting in a household at one-minute
+ * intervals during the day.
  * 
- * @author jkeirste
+ * @author James Keirstead
  * 
  */
 public class LightingModel {
@@ -52,8 +53,9 @@ public class LightingModel {
 	private int month;
 	private float mean_irradiance = 60f;
 	private float sd_irradiance = 10f;
+	private File out_file;
 	private String out_dir;
-	private String occupancy_file = "occupancy_output.csv";
+	private OccupancyModel occModel;
 
 	// Data files
 	private static String irradiance_file = "/data/irradiance.csv";
@@ -66,48 +68,66 @@ public class LightingModel {
 	 *            an int giving the month to simulate (1-12)
 	 * @param dir
 	 *            a String giving the output directory
+	 * @param model
+	 *            an OccupancyModel to provide data on occupancy within the home
 	 */
-	public LightingModel(int month, String dir) {
+	public LightingModel(int month, String dir, OccupancyModel model) {
 		this.month = SimElec.validateMonth(month);
 		this.out_dir = dir;
+		this.out_file = new File(out_dir, "lighting_output.csv");
+		this.occModel = model;
 	}
 
 	/**
 	 * 
-	 * Simulates the electricity demand for lighting in a household
+	 * Simulates the electricity demand for lighting in a household for a single
+	 * day at one-minute intervals.
 	 * 
 	 * @param args
-	 *            takes two, four, or five arguments. The first two are an int
-	 *            giving the month (1-12) and a String giving the output
-	 *            directory. The optional arguments three and four are floats
+	 *            takes four arguments, plus three options. The first is an int
+	 *            giving the number of residents in the home, the second an int
+	 *            giving the month to simulate (1-12), the third is a two-letter
+	 *            code indicating weekend (<code>we</code>) or weekday (
+	 *            <code>wd</code>), and the fourth is a String giving the output
+	 *            directory. The optional arguments five and six are floats
 	 *            giving the mean and standard deviation of the irradiance in
-	 *            W/m2. Optional argument five is an int giving a random number
+	 *            W/m2. Optional argument seven is an int giving a random number
 	 *            seed.
+	 * 
+	 *            If these are not specified, the default is to simulate two
+	 *            occupants for a weekday with results saved in the current
+	 *            directory.
+	 * 
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
 
-		int month;
-		String dir;
+		int month = 1;
+		int residents = 2;
+		boolean weekend = false;
+		String dir = ".";
+		OccupancyModel occ = new OccupancyModel(residents, weekend, dir);
 
-		if (args.length == 2 || args.length == 4 || args.length == 5) {
-			month = Integer.valueOf(args[0]);
-			dir = args[1];
+		if (args.length == 4 || args.length == 6 || args.length == 7) {
+			residents = Integer.valueOf(args[0]);
+			month = Integer.valueOf(args[1]);
+			weekend = args[2].equals("we") ? true : false;
+			dir = args[3];
 
-			if (args.length == 5)
+			occ = new OccupancyModel(residents, weekend, dir);
+
+			if (args.length == 7)
 				LightingModel.setSeed(Integer.valueOf(args[4]));
 
 		} else {
 			System.out.printf(
 					"%d arguments detected.  Using default arguments.%n",
 					args.length);
-			month = 1;
-			dir = ".";
 		}
 
-		LightingModel model = new LightingModel(month, dir);
+		LightingModel model = new LightingModel(month, dir, occ);
 
-		if (args.length == 4) {
+		if (args.length == 6) {
 			model.mean_irradiance = Float.valueOf(args[2]);
 			model.sd_irradiance = Float.valueOf(args[3]);
 		}
@@ -138,9 +158,8 @@ public class LightingModel {
 		// Calculate the number of bulbs in the household
 		List<Bulb> bulbs = getBulbs();
 		int[] irradiance = getIrradianceData(month);
-
-		File occupancy_file = new File(out_dir, this.occupancy_file);
-		int[] occupancy = getOccupancy(occupancy_file);
+		
+		int[] occupancy = occModel.getOccupancy();
 
 		// Main simulation loop
 		// for each bulb in the household
@@ -189,8 +208,7 @@ public class LightingModel {
 		}
 
 		// Save the result to a CSV file
-		File outputFile = new File(out_dir, "lighting_output.csv");
-		CSVWriter writer = new CSVWriter(new FileWriter(outputFile), ',', '\0');
+		CSVWriter writer = new CSVWriter(new FileWriter(out_file), ',', '\0');
 		writer.writeAll(results);
 		writer.close();
 
@@ -229,27 +247,6 @@ public class LightingModel {
 	}
 
 	/**
-	 * Retrieves occupancy data at ten-minute intervals
-	 * 
-	 * @param file
-	 *            a String giving the file location of the occupancy model
-	 *            results
-	 * @return
-	 * @throws IOException
-	 */
-	static int[] getOccupancy(File file) throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(file));
-		List<String[]> myEntries = reader.readAll();
-		reader.close();
-		int[] result = new int[myEntries.size()];
-		for (int i = 0; i < myEntries.size(); i++) {
-			result[i] = Integer.valueOf(myEntries.get(i)[1]);
-		}
-
-		return (result);
-	}
-
-	/**
 	 * Gets the bulbs in the household based on 100 sample bulb configurations.
 	 * The data has been generated stochastically, based upon statistics
 	 * available from: (1) The Lighting Association, In Home Lighting Audit
@@ -269,7 +266,7 @@ public class LightingModel {
 				',', '\'', 10);
 		List<String[]> myEntries = reader.readAll();
 		reader.close();
-		
+
 		// Choose a random house
 		int house = Uniform.staticNextIntFromTo(0, myEntries.size() - 1);
 
@@ -278,14 +275,13 @@ public class LightingModel {
 		int nBulbs = Integer.valueOf(data[1]);
 		List<Bulb> bulbs = new ArrayList<Bulb>(nBulbs);
 
-
 		// Note that the input data file is a ragged array. To get CSVReader
 		// to work, it has been padded with 0 values for bulb ratings. However
 		// the first column "nBulbs" specifies how many valid values to read.
 		for (int i = 0; i < nBulbs; i++) {
 
 			// Read in the power rating of the bulb
-			int rating = Integer.valueOf(data[2 + i]);			
+			int rating = Integer.valueOf(data[2 + i]);
 			Bulb b = new Bulb(i, rating);
 			bulbs.add(b);
 		}
@@ -310,7 +306,7 @@ public class LightingModel {
 				',', '\'', 8);
 		List<String[]> myEntries = reader.readAll();
 		reader.close();
-		
+
 		int[] answer = new int[myEntries.size()];
 		for (int i = 0; i < myEntries.size(); i++) {
 			answer[i] = Integer.valueOf(myEntries.get(i)[2 + month]);
