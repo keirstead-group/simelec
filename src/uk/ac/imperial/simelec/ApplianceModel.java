@@ -6,7 +6,7 @@
     Loughborough University, Leicestershire LE11 3TU, UK
     Tel. +44 1509 635326. Email address: I.W.Richardson@lboro.ac.uk
 
-	Java Implementation (c) 2014 James Keirstead
+	Java implementation (c) 2014 James Keirstead
 	Imperial College London
 	j.keirstead@imperial.ac.uk
 	
@@ -33,26 +33,24 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.MersenneTwister;
 import cern.jet.random.engine.RandomEngine;
-
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * Simulates the electricity demand for appliances in a household.
+ * Simulates the electricity demand for appliances in a household at one-minute
+ * intervals for the course of a single day.
  * 
- * @author jkeirste
+ * @author James Keirstead
  * 
  */
 public class ApplianceModel {
 
-	// Class variables
+	// Member variables
 	private int month;
 	private boolean weekend;
 	private String out_dir;
@@ -72,7 +70,8 @@ public class ApplianceModel {
 
 	/**
 	 * 
-	 * Simulate the electricity demand from appliances for a household.
+	 * Simulate the electricity demand from appliances for a household at
+	 * one-minute intervals for a single day.
 	 * 
 	 * @param args
 	 *            takes three arguments, plus one option. The first is an int
@@ -146,28 +145,15 @@ public class ApplianceModel {
 		// Assign the appliances to households
 		configure_appliances(appliances);
 
-		// Set up a map to hold the results
-		Map<Appliance, double[]> results = new HashMap<Appliance, double[]>();
-
 		// Simulate each appliance
 		for (Appliance a : appliances) {
 
-			if (!a.isOwned()) {
-				// If the appliance isn't present, then store an empty array
-				results.put(a, new double[1440]);
-			} else {
-
-				// Randomly delay the start of appliances that have a restart
-				// delay
-				a.setRestartDelay();
-
-				// Make the rated power variable over a normal distribution to
-				// provide some variation
-				a.setRatedPower();
+			// If the appliance is owned, then we simulate it.
+			// If not, it's already stored an array of empty values
+			if (a.isOwned()) {
 
 				// Initialise the daily simulation loop
 				int time = 0;
-				double[] power_vals = new double[1440];
 
 				while (time < 1440) {
 					// Set the default (standby) power demand at this time step
@@ -177,21 +163,18 @@ public class ApplianceModel {
 					int iTenMinuteCount = (int) Math.floor((time - 1) / 10);
 
 					// Get the number of current active occupants for this
-					// minute
-					// Convert from 10 minute to 1 minute resolution
-					int iActiveOccupants = occupancy[(int) Math
-							.floor((time - 1) / 10)];
+					// minute. Convert from 10 minute to 1 minute resolution
+					int iActiveOccupants = occupancy[iTenMinuteCount];
 
 					// If this appliance is off having completed a cycle (ie. a
 					// restart delay)
-					if ((a.cycle_time_left <= 0)
-							&& (a.restart_delay_time_left > 0)) {
+					if (a.isOff() && (a.awaitingRestart())) {
 
 						// Decrement the cycle time left
 						a.restart_delay_time_left--;
 
-					} else if (a.cycle_time_left <= 0) {
-						// Else if this appliance is off
+					} else if (a.isOff()) {
+						// Else if this appliance is off but able to restart
 
 						// There must be active occupants, or the profile must
 						// not depend on occupancy for a start event to occur
@@ -215,8 +198,7 @@ public class ApplianceModel {
 										a.use_profile);
 
 								// Get the activity statistics for this profile
-								// Get the probability for this activity profile
-								// for this time step
+								// at this time step
 								dActivityProbability = pm.modifiers[iTenMinuteCount];
 
 							} else if (a.name.equals("ELEC_SPACE_HEATING")) {
@@ -235,19 +217,21 @@ public class ApplianceModel {
 								// This is a start event
 								a.start();
 
+								// Once it's on, we need to "run" it too
+								a.run();
+
 							}
 						} else if (a.use_profile.equals("CUSTOM")
 								&& a.name.equals("STORAGE_HEATER")) {
 							// Custom appliance handler: storage heaters have a
 							// simple representation
 							// The number of cycles (one per day) set out in the
-							// calibration sheet
-							// is used to determine whether the storage heater
-							// is used
+							// calibration sheet is used to determine whether
+							// the storage heater is used
 
 							// This model does not account for the changes in
-							// the Economy 7 time
-							// It assumes that the time starts at 00:30 each day
+							// the Economy 7 time. It assumes that the time
+							// starts at 00:30 each day
 							if (iTenMinuteCount == 4) { // ie. 00:30 - 00:40
 
 								// Assume January 14th is the coldest day of the
@@ -292,6 +276,7 @@ public class ApplianceModel {
 
 									// This is a start event
 									a.start();
+									a.run();
 
 								}
 							}
@@ -313,44 +298,30 @@ public class ApplianceModel {
 							// off upon a transition to inactive occupancy.
 						} else {
 
-							// Set the power
-							a.power = a.GetPowerUsage(a.cycle_time_left);
-
-							// Decrement the cycle time left
-							a.cycle_time_left--;
+							a.run();
 
 						}
 					}
 
 					// Save the power value
-					power_vals[time] = (double) a.power;
+					a.consumption[time] = (double) a.power;
 
 					// Increment the time
 					time++;
 				}
-
-				results.put(a, power_vals);
 			}
 		}
 
 		// Write the data back to the simulation sheet
-		ArrayList<String[]> final_vals = new ArrayList<String[]>(
-				appliances.size());
+		ArrayList<String[]> results = new ArrayList<String[]>(appliances.size());
 		for (Appliance a : appliances) {
-			String[] tmp = new String[1440 + 1];
-			double[] data = results.get(a);
-			tmp[0] = a.name;
-
-			for (int i = 0; i < 1440; i++) {
-				tmp[i + 1] = String.valueOf(data[i]);
-			}
-			final_vals.add(tmp);
+			results.add(a.toExportString());
 		}
 
 		// Save the result to a CSV file
 		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file), ',',
 				'\0');
-		writer.writeAll(final_vals);
+		writer.writeAll(results);
 		writer.close();
 
 		// System.out.println("done.");
@@ -379,7 +350,7 @@ public class ApplianceModel {
 		// TODO for six person households, is the best thing just to pretend
 		// that there are five people there?
 		occupants = SimElec.validateResidents(occupants);
-		
+
 		for (ProbabilityModifier pm : activities) {
 			if (pm.isWeekend == weekend
 					&& pm.active_occupant_count == occupants
@@ -398,7 +369,7 @@ public class ApplianceModel {
 	 */
 	private void configure_appliances(List<Appliance> apps) {
 		for (Appliance a : apps)
-			a.assign_ownership();
+			a.assignOwnership();
 	}
 
 	/**
@@ -450,11 +421,11 @@ public class ApplianceModel {
 		reader.close();
 		List<Appliance> results = new ArrayList<Appliance>();
 		for (String[] s : appliances) {
+			// TODO energy (column 4, s[3]) not used?
 			Appliance a = new Appliance(s[0], s[1], Double.valueOf(s[2]),
-					Double.valueOf(s[3]), Integer.valueOf(s[4]),
-					Integer.valueOf(s[5]), Double.valueOf(s[6]),
-					Integer.valueOf(s[7]), Integer.valueOf(s[8]),
-					Double.valueOf(s[9]));
+					Integer.valueOf(s[4]), Integer.valueOf(s[5]),
+					Double.valueOf(s[6]), Integer.valueOf(s[7]),
+					Integer.valueOf(s[8]), Double.valueOf(s[9]));
 			results.add(a);
 		}
 
@@ -501,9 +472,9 @@ public class ApplianceModel {
 	 * @param seed
 	 *            an int giving the seed
 	 */
-	public static void setSeed(int seed) {
-		// TODO verify that this works for the Normal draws as well
+	public static void setSeed(int seed) {		
+		// This will also apply to the static method of other distributions
 		RandomEngine engine = new MersenneTwister(seed);
-		Uniform.staticSetRandomEngine(engine);
+		Uniform.staticSetRandomEngine(engine);		
 	}
 }
