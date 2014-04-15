@@ -371,6 +371,7 @@ public class ApplianceModel {
 				return (pm);
 			}
 		}
+				
 		return null;
 	}
 
@@ -401,7 +402,8 @@ public class ApplianceModel {
 		reader.close();
 		List<ProbabilityModifier> result = new ArrayList<ProbabilityModifier>();
 		for (String[] s : activities) {
-			boolean weekend = Boolean.valueOf(s[0]);
+			int bool = Integer.valueOf(s[0]);
+			boolean weekend = (bool==1);
 			int occupants = Integer.valueOf(s[1]);
 			String ID = s[2].toUpperCase();
 

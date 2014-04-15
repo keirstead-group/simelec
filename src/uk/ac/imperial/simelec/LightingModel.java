@@ -309,7 +309,7 @@ public class LightingModel {
 
 		int[] answer = new int[myEntries.size()];
 		for (int i = 0; i < myEntries.size(); i++) {
-			answer[i] = Integer.valueOf(myEntries.get(i)[2 + month]);
+			answer[i] = Integer.valueOf(myEntries.get(i)[1 + month]);
 		}
 		return (answer);
 
