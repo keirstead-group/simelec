@@ -488,6 +488,6 @@ public class ApplianceModel {
 	public static void setSeed(int seed) {
 		// This will also apply to the static method of other distributions
 		RandomEngine engine = new MersenneTwister(seed);
-		Uniform.staticSetRandomEngine(engine);
+		Uniform.staticSetRandomEngine(engine);		
 	}
 }
