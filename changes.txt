@@ -1,0 +1,8 @@
+SimElec domestic electricity load profiler simulator
+
+simelec-0.1.0 (15 April 2014)
+===============================
+
+ * Initial port of model from VBA/Excel to Java
+
+ * Includes a basic JavaFX user interface

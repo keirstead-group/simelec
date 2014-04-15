@@ -25,65 +25,133 @@
  */
 package uk.ac.imperial.simelec;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-import cern.jet.random.Uniform;
-import cern.jet.random.engine.MersenneTwister;
-import cern.jet.random.engine.RandomEngine;
 
+/**
+ * Simulates the number of active occupants within a household for a single day
+ * at ten-minute intervals.
+ * 
+ * @author jkeirste
+ * 
+ */
 public class OccupancyModel {
 
+	// Class variables
+	private int nResidents;
+	private boolean weekend;
+	private String out_dir;
+	private File out_file;
+	private boolean has_run = false;
+
+	// Data variables
+	private static String start_states_weekend = "/data/occ_start_states_weekend.csv";
+	private static String start_states_weekday = "/data/occ_start_states_weekday.csv";
+	private static String template = "/data/tpm_%d_%s.csv";
+
+	/**
+	 * Simulates the number of active occupants within a household for a single
+	 * day at ten-minute intervals.
+	 * 
+	 * @param args
+	 *            a String array specifying the number of residents, a
+	 *            two-letter code for weekend (<code>we</code>) or weekday (
+	 *            <code>wd</code>), and a String giving the output directory for
+	 *            the results. An optional fourth argument can be specified, an
+	 *            int giving a random number seed. If these are not specified,
+	 *            the default is to simulate two occupants for a weekday with
+	 *            results saved in the current directory.
+	 */
 	public static void main(String[] args) {
-		OccupancyModel model = new OccupancyModel();
+
+		int residents;
+		boolean weekend;
+		String output_dir;
+
+		// Check the inputs
+		if (args.length == 3 || args.length == 4) {
+			residents = Integer.valueOf(args[0]);
+			weekend = args[1].equals("we") ? true : false;
+			output_dir = args[2];
+			if (args.length == 4) {
+				DiscretePDF.setSeed(Integer.valueOf(args[3]));
+			}
+		} else {
+			System.out.printf(
+					"%d arguments detected.  Using default arguments.%n",
+					args.length);
+			residents = 2;
+			weekend = false;
+			output_dir = ".";
+		}
+
+		// Build the model
+		OccupancyModel model = new OccupancyModel(residents, weekend,
+				output_dir);
+
+		// Run the model
 		try {
-			model.RunOccupancySimulation(2, false, "data/occupancy_output.csv");
+			model.run();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+	}
+
+	/**
+	 * Create a new OccupancyModel with a specified number of residents,
+	 * simulation day, and output directory
+	 * 
+	 * @param residents
+	 *            an int between 1 and 5 giving the number of residents
+	 * @param weekend
+	 *            a boolean indicating whether to simulate a weekday (
+	 *            <code>false</code>) or weekend (<code>true</code>)
+	 * @param dir
+	 *            a String giving the output directory
+	 */
+	public OccupancyModel(int residents, boolean weekend, String dir) {
+		this.nResidents = SimElec.validateResidents(residents);
+		this.weekend = weekend;
+		this.out_dir = dir;
+		this.out_file = new File(dir, "occupancy_output.csv");
 	}
 
 	/**
 	 * Simulate the number of active occupants in a domestic dwelling for a
 	 * single day at ten-minute intervals.
 	 * 
-	 * @param nResidents
-	 *            the number of residents in the dwelling (1-5)
-	 * @param weekend
-	 *            if <code>true</code>, simulate a weekend day. Else simulate a
-	 *            weekday
-	 * @param outputFile
-	 *            a String giving the relative path for the results file
-	 * 
 	 * @throws IOException
 	 */
-	public void RunOccupancySimulation(int nResidents, boolean weekend,
-			String outputFile) throws IOException {
+	public void run() throws IOException {
 
-		// Step 1: Check inputs
-		if (nResidents < 0 || nResidents > 5) {
-			System.out.print("1-5 residents only.  Simulating for 1 resident.");
-			nResidents = 1;
-		}
+		// System.out.print("Running occupancy model...");
 
-		// Set up the random number generator
-		RandomEngine engine = new MersenneTwister(12345);
-		Uniform.staticSetRandomEngine(engine);
+		// Ensure the output directory exists
+		File dir = new File(this.out_dir);
+		if (!dir.isDirectory())
+			dir.mkdirs();
 
 		// Step 2: Determine the active occupancy start state between 00:00 and
 		// 00:10
 
 		// Load in the start state data from occ_start_states
-		String filename = weekend ? "data/occ_start_states_weekend.csv"
-				: "data/occ_start_states_weekday.csv";
-		CSVReader reader = new CSVReader(new FileReader(filename), ',', '\'', 2);
+		String filename = weekend ? start_states_weekend : start_states_weekday;
+		URL url = this.getClass().getResource(filename);
+		File f = new File(url.getPath());
+		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 2);
 		List<String[]> myEntries = reader.readAll();
-		float[] vector = new float[myEntries.size()]; // vector = n rows
+		reader.close();
+
+		double[] vector = new double[myEntries.size()]; // vector = n rows
 		int j = 0;
 		for (String[] s : myEntries) {
 			vector[j] = Float.valueOf(s[nResidents]);
@@ -91,18 +159,20 @@ public class OccupancyModel {
 		}
 
 		// Draw from the cumulative distribution
-		int initialState = draw_from_pdf(vector);
+		DiscretePDF pdf = new DiscretePDF(vector);
+		int initialState = pdf.getRandomIndex();
 
 		// Step 3: Determine the active occupancy transitions for each ten
 		// minute period of the day.
 
 		// First load in the correct file
-		String template = "data/tpm_%d_%s.csv";
 		filename = String.format(template, nResidents, weekend ? "weekend"
 				: "weekday");
-		reader = new CSVReader(new FileReader(filename), ',', '\'', 1);
+		url = this.getClass().getResource(filename);
+		f = new File(url.getPath());
+		reader = new CSVReader(new FileReader(f), ',', '\'', 1);
 		myEntries = reader.readAll();
-
+		reader.close();
 		// Create a list to save the results
 		List<String[]> results = new ArrayList<String[]>(144);
 		String[] tmp = { "1", String.valueOf(initialState) };
@@ -116,13 +186,14 @@ public class OccupancyModel {
 			String[] row = myEntries.get(rowID);
 
 			// Grab the vector of transition probabilities
-			vector = new float[row.length - 2];
+			vector = new double[row.length - 2];
 			for (int i = 2; i < row.length - 2; i++) {
 				vector[i - 2] = Float.valueOf(row[i]);
 			}
 
 			// Draw for the probability
-			int newState = draw_from_pdf(vector);
+			pdf = new DiscretePDF(vector);
+			int newState = pdf.getRandomIndex();
 
 			String[] tmp2 = { String.valueOf(t + 1), String.valueOf(newState) };
 			results.add(tmp2);
@@ -130,50 +201,34 @@ public class OccupancyModel {
 		}
 
 		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(outputFile));
+		CSVWriter writer = new CSVWriter(new FileWriter(out_file), ',', '\0');
 		writer.writeAll(results);
 		writer.close();
 
+		has_run = true;
+		// System.out.println("done.");
 	}
 
 	/**
-	 * Draws from a probability density function.
+	 * Retrieves occupancy data calculated by this OccupancyModel.
 	 * 
-	 * @param pdf
-	 *            a vector of floats giving the probability density function
-	 * @return an integer giving the index of the selected interval
+	 * @return an array of 144 int values giving the occupancy at ten-minute
+	 *         intervals during the day
+	 * @throws IOException
 	 */
-	private int draw_from_pdf(float[] pdf) {
-
-		// Draw the value
-		float rand = (float) Uniform.staticNextDouble();
-
-		// Initialize the loop
-		int interval = 0;
-		do {
-			if (rand <= cumsum(pdf)[interval])
-				break;
-			interval++;
-		} while (interval < pdf.length);
-
-		return (interval);
-	}
-
-	/**
-	 * Calculates the cumulative sum of a vector
-	 * 
-	 * @param vector
-	 *            a vector of float values
-	 * @return a vector of float values
-	 */
-	private float[] cumsum(float[] vector) {
-		float[] empty = new float[vector.length];
-		float prev = 0f;
-		for (int i = 0; i < empty.length; i++) {
-			empty[i] = prev + vector[i];
-			prev = empty[i];
+	public int[] getOccupancy() throws IOException {
+		
+		if (!has_run) this.run();
+		
+		CSVReader reader = new CSVReader(new FileReader(out_file));
+		List<String[]> myEntries = reader.readAll();
+		reader.close();
+		int[] result = new int[myEntries.size()];
+		for (int i = 0; i < myEntries.size(); i++) {
+			result[i] = Integer.valueOf(myEntries.get(i)[1]);
 		}
-		return (empty);
+
+		return (result);
 	}
 
 }
