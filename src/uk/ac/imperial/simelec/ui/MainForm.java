@@ -97,14 +97,14 @@ public class MainForm implements javafx.fxml.Initializable {
 
 				boolean runLighting = chbLighting.isSelected();
 				boolean runAppliances = chbAppliances.isSelected();
-				boolean runRPlots = chbRPlots.isSelected();
+		//		boolean runRPlots = chbRPlots.isSelected();
 
 				if (out_dir == null || out_dir.equals("")) {
 					lblStatus.setTextFill(Color.RED);
 					lblStatus.setText("Please select an output directory");
 
 				} else {
-
+					
 					SimElec model = new SimElec(month, residents, weekend,
 							out_dir);
 					model.setRunAppliances(runAppliances);
