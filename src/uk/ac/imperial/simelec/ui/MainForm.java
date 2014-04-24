@@ -52,7 +52,6 @@ public class MainForm implements javafx.fxml.Initializable {
 
 	private Stage stage;
 
-	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 				
 		cbxResidents.setItems(FXCollections.observableArrayList(1, 2, 3, 4, 5));
@@ -67,7 +66,6 @@ public class MainForm implements javafx.fxml.Initializable {
 		cbxDayOfWeek.setValue("Weekday");
 
 		btnOutdir.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
 			public void handle(ActionEvent e) {
 
 				DirectoryChooser dirChooser = new DirectoryChooser();
@@ -81,7 +79,6 @@ public class MainForm implements javafx.fxml.Initializable {
 		});
 
 		btnRunSimElec.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
 			public void handle(ActionEvent e) {
 				int residents = cbxResidents.getValue();
 				String strMonth = cbxMonth.getValue();
