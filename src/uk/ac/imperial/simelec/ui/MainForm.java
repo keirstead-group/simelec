@@ -17,16 +17,20 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
  * Main form for SimElec model
  * 
  * @author James Keirstead
- *
+ * 
  */
 public class MainForm implements javafx.fxml.Initializable {
 	@FXML
@@ -49,11 +53,15 @@ public class MainForm implements javafx.fxml.Initializable {
 	private Button btnRunSimElec;
 	@FXML
 	private Label lblStatus;
+	@FXML
+	private Label lblAbout;
+	@FXML
+	private MenuBar menuBar;
 
 	private Stage stage;
 
 	public void initialize(URL location, ResourceBundle resources) {
-				
+
 		cbxResidents.setItems(FXCollections.observableArrayList(1, 2, 3, 4, 5));
 		cbxMonth.setItems(FXCollections.observableArrayList("January",
 				"February", "March", "April", "May", "June", "July", "August",
@@ -64,6 +72,27 @@ public class MainForm implements javafx.fxml.Initializable {
 		cbxResidents.setValue(1);
 		cbxMonth.setValue("January");
 		cbxDayOfWeek.setValue("Weekday");
+
+		Label menuLabel = new Label("About");
+		menuLabel.setStyle("-fx-padding: 0px;");
+		menuLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			public void handle(MouseEvent event) {
+				Stage myDialog = new Stage();
+				myDialog.initModality(Modality.WINDOW_MODAL);
+				try {
+					AboutUI about = new AboutUI();
+					about.start(myDialog);
+					myDialog.show();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
+		Menu fileMenuButton = new Menu();
+		fileMenuButton.setGraphic(menuLabel);
+		menuBar.getMenus().add(fileMenuButton);
 
 		btnOutdir.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
@@ -94,14 +123,14 @@ public class MainForm implements javafx.fxml.Initializable {
 
 				boolean runLighting = chbLighting.isSelected();
 				boolean runAppliances = chbAppliances.isSelected();
-		//		boolean runRPlots = chbRPlots.isSelected();
+				// boolean runRPlots = chbRPlots.isSelected();
 
 				if (out_dir == null || out_dir.equals("")) {
 					lblStatus.setTextFill(Color.RED);
 					lblStatus.setText("Please select an output directory");
 
 				} else {
-					
+
 					SimElec model = new SimElec(month, residents, weekend,
 							out_dir);
 					model.setRunAppliances(runAppliances);
@@ -119,7 +148,7 @@ public class MainForm implements javafx.fxml.Initializable {
 				}
 			}
 		});
-		
+
 		chbRPlots.setDisable(true);
 	}
 
