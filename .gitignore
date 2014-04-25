@@ -1,6 +1,3 @@
-.classpath
-.project
-
 *.pydevproject
 .metadata
 .gradle
@@ -35,3 +32,4 @@ local.properties
 ## Ignore test R outputs
 R/*.png
 *_output.csv
+/target
