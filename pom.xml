@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.imperial</groupId>
   <artifactId>SimElec</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>0.1.1</version>
   <name>SimElec</name>
   <description>A simulation model for domestic electricity consumption</description>
   <build>

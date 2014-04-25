@@ -1,5 +1,12 @@
 SimElec domestic electricity load profiler simulator
 
+simelec-0.1.1 (25 April 2014)
+===============================
+
+ * Added support for Maven builds
+ 
+ * Added an 'About' dialog to the UI
+
 simelec-0.1.0 (15 April 2014)
 ===============================
 

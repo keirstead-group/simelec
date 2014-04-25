@@ -29,5 +29,5 @@ This version of SimElec is maintained by James Keirstead
 (j.keirstead@imperial.ac.uk) at the Department of Civil and
 Environmental Engineering, Imperial College London.
 
-Version 0.1.0
-Released 15-04-2014
+Version 0.1.1
+Released 25-04-2014
