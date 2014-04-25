@@ -30,4 +30,4 @@ This version of SimElec is maintained by James Keirstead
 Environmental Engineering, Imperial College London.
 
 Version ${project.version}
-Released 25-04-2014
+Released ${timestamp}
