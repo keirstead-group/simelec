@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.imperial</groupId>
   <artifactId>SimElec</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2-SNAPSHOT</version>
   <name>SimElec</name>
   <description>A simulation model for domestic electricity consumption</description>
   <build>
@@ -15,6 +15,22 @@
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
+	  <resource>
+    	<directory>docs</directory>
+    	<filtering>true</filtering>
+    	<includes>
+      	<include>**/version.txt</include>
+      	<include>**/README.md</include>
+    	</includes>
+  	</resource>
+  	<resource>
+	    <directory>docs</directory>
+	    <filtering>false</filtering>
+	    <excludes>
+      	<exclude>**/version.txt</exclude>
+      	<exclude>**/readme.MD</exclude>
+    	</excludes>
+  	</resource>  
     </resources>
     <plugins>
       <plugin>
@@ -39,7 +55,7 @@
                     <version>2.1.0</version>
                 </dependency>
             </dependencies>
-        </plugin>
+        </plugin>      
     </plugins>
   </build>
   <organization>
