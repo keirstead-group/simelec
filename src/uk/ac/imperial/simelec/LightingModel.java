@@ -26,10 +26,10 @@
 package uk.ac.imperial.simelec;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -158,7 +158,7 @@ public class LightingModel {
 		// Calculate the number of bulbs in the household
 		List<Bulb> bulbs = getBulbs();
 		int[] irradiance = getIrradianceData(month);
-		
+
 		int[] occupancy = occModel.getOccupancy();
 
 		// Main simulation loop
@@ -260,10 +260,9 @@ public class LightingModel {
 	private List<Bulb> getBulbs() throws IOException {
 
 		// Load in the raw data
-		URL url = this.getClass().getResource(bulbs_file);
-		File f = new File(url.getPath());
-		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()),
-				',', '\'', 10);
+		InputStream is = this.getClass().getResourceAsStream(bulbs_file);
+		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'',
+				10);
 		List<String[]> myEntries = reader.readAll();
 		reader.close();
 
@@ -300,9 +299,8 @@ public class LightingModel {
 	 */
 	private int[] getIrradianceData(int month) throws IOException {
 
-		URL url = this.getClass().getResource(irradiance_file);
-		File f = new File(url.getPath());
-		CSVReader reader = new CSVReader(new FileReader(f.getAbsolutePath()),
+		InputStream is = this.getClass().getResourceAsStream(irradiance_file);
+		CSVReader reader = new CSVReader(new InputStreamReader(is),
 				',', '\'', 8);
 		List<String[]> myEntries = reader.readAll();
 		reader.close();

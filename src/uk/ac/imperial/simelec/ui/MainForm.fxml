@@ -6,8 +6,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="360.0" prefWidth="510.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="uk.ac.imperial.simelec.ui.MainForm">
-<children><GridPane layoutX="15.0" layoutY="14.0" prefHeight="169.0" prefWidth="462.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
+<AnchorPane prefHeight="360.0" prefWidth="510.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="uk.ac.imperial.simelec.ui.MainForm">
+<children><MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="510.0" /><GridPane layoutX="15.0" layoutY="14.0" prefHeight="169.0" prefWidth="462.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
   <columnConstraints>
     <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="143.0" minWidth="120.0" prefWidth="143.0" />
     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="246.0" minWidth="10.0" prefWidth="209.0" />

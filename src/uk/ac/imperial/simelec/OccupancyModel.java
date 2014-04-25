@@ -29,7 +29,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,9 +146,8 @@ public class OccupancyModel {
 
 		// Load in the start state data from occ_start_states
 		String filename = weekend ? start_states_weekend : start_states_weekday;
-		URL url = this.getClass().getResource(filename);
-		File f = new File(url.getPath());
-		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 2);
+		InputStream is = this.getClass().getResourceAsStream(filename);		
+		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'', 2);
 		List<String[]> myEntries = reader.readAll();
 		reader.close();
 
@@ -168,9 +168,8 @@ public class OccupancyModel {
 		// First load in the correct file
 		filename = String.format(template, nResidents, weekend ? "weekend"
 				: "weekday");
-		url = this.getClass().getResource(filename);
-		f = new File(url.getPath());
-		reader = new CSVReader(new FileReader(f), ',', '\'', 1);
+		is = this.getClass().getResourceAsStream(filename);
+		reader = new CSVReader(new InputStreamReader(is), ',', '\'', 1);
 		myEntries = reader.readAll();
 		reader.close();
 		// Create a list to save the results
@@ -217,9 +216,10 @@ public class OccupancyModel {
 	 * @throws IOException
 	 */
 	public int[] getOccupancy() throws IOException {
-		
-		if (!has_run) this.run();
-		
+
+		if (!has_run)
+			this.run();
+
 		CSVReader reader = new CSVReader(new FileReader(out_file));
 		List<String[]> myEntries = reader.readAll();
 		reader.close();

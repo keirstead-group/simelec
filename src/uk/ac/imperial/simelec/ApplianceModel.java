@@ -26,10 +26,10 @@
 package uk.ac.imperial.simelec;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -395,9 +395,8 @@ public class ApplianceModel {
 	 */
 	private List<ProbabilityModifier> loadActivityStatistics()
 			throws IOException {
-		URL url = this.getClass().getResource(activity_file);
-		File f = new File(url.getPath());
-		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 6);
+		InputStream is = this.getClass().getResourceAsStream(activity_file);
+		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'', 6);
 		List<String[]> activities = reader.readAll();
 		reader.close();
 		List<ProbabilityModifier> result = new ArrayList<ProbabilityModifier>();
@@ -429,9 +428,8 @@ public class ApplianceModel {
 	 */
 	private List<Appliance> loadAppliances() throws IOException {
 
-		URL url = this.getClass().getResource(appliance_file);
-		File f = new File(url.getPath());
-		CSVReader reader = new CSVReader(new FileReader(f), ',', '\'', 37);
+		InputStream is = this.getClass().getResourceAsStream(appliance_file);
+		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'', 37);
 		List<String[]> appliances = reader.readAll();
 		reader.close();
 		List<Appliance> results = new ArrayList<Appliance>();
