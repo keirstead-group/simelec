@@ -26,7 +26,6 @@
 package uk.ac.imperial.simelec;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
 import cern.jet.random.Normal;
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.MersenneTwister;
@@ -47,18 +45,11 @@ import cern.jet.random.engine.RandomEngine;
  * @author James Keirstead
  * 
  */
-public class LightingModel {
+public class LightingModel extends LoadModel<Bulb> {
 
-	// Class variables
-	private int month;
 	private float mean_irradiance = 60f;
-	private float sd_irradiance = 10f;
-	private File out_file;
-	private String out_dir;
-	private OccupancyModel occModel;
-	private List<Bulb> bulbs;
-	private boolean totalOnly = true;
-
+	private float sd_irradiance = 10f;	
+	
 	// Data files
 	private static String irradiance_file = "/data/irradiance.csv";
 	private static String bulbs_file = "/data/bulbs.csv";
@@ -74,10 +65,7 @@ public class LightingModel {
 	 *            an OccupancyModel to provide data on occupancy within the home
 	 */
 	public LightingModel(int month, String dir, OccupancyModel model) {
-		this.month = SimElec.validateMonth(month);
-		this.out_dir = dir;
-		this.out_file = new File(out_dir, "lighting_output.csv");
-		this.occModel = model;
+		super(month, true, dir, new File(dir, "lighting_output.csv"), model);		
 	}
 
 	/**
@@ -144,7 +132,7 @@ public class LightingModel {
 	 * @throws IOException
 	 * 
 	 */
-	public void run() throws IOException {
+	public void runModel() throws IOException {
 
 		// Ensure the output directory exists
 		File dir = new File(this.out_dir);
@@ -156,14 +144,14 @@ public class LightingModel {
 				this.mean_irradiance, this.sd_irradiance);
 
 		// Calculate the number of bulbs in the household
-		bulbs = getBulbs();
+		loads = getBulbs();
 		int[] irradiance = getIrradianceData(month);
 
-		int[] occupancy = occModel.getOccupancy();
+		int[] occupancy = model.getOccupancy();
 
 		// Main simulation loop
 		// for each bulb in the household
-		for (Bulb b : bulbs) {
+		for (Bulb b : loads) {
 
 			// for each minute of the day
 			int t = 0;
@@ -202,44 +190,9 @@ public class LightingModel {
 			}
 		}
 
-		writeResults(out_file);
-
 	}
 
-	/**
-	 * Writes the results of this LightingModel to a specified File
-	 * 
-	 * @param file
-	 *            the file on which to write the results
-	 * @throws IOException
-	 *             if there are problems writing the results to file
-	 */
-	private void writeResults(File file) throws IOException {
-
-		// Write the data back to the simulation sheet
-		ArrayList<String[]> results;
-		if (totalOnly) {
-			results = new ArrayList<String[]>(1);
-			double[] consumption = new double[1440]; // W
-			for (Load b : bulbs) {
-				for (int i = 0; i < consumption.length; i++) {
-					consumption[i] += b.getConsumption(i + 1);
-				}
-			}
-			results.add(Load.buildExportString("LIGHTS", consumption));
-		} else {
-			results = new ArrayList<String[]>(bulbs.size());
-			for (Load b : bulbs) {
-				results.add(b.toExportString());
-			}
-		}
-
-		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '\0');
-		writer.writeAll(results);
-		writer.close();
-
-	}
+	
 
 	/**
 	 * Effective occupancy represents the sharing of light use.
