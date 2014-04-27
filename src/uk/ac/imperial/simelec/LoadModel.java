@@ -92,8 +92,9 @@ public abstract class LoadModel<V extends Load> {
 					consumption[i] += l.getConsumption(i + 1);
 				}
 			}
-			
-			String label = this.getClass().getSimpleName().replaceFirst("Model", "");
+
+			String label = this.getClass().getSimpleName()
+					.replaceFirst("Model", "");
 			results.add(Load.buildExportString(label.toUpperCase(), consumption));
 		} else {
 			results = new ArrayList<String[]>(loads.size());
@@ -107,6 +108,17 @@ public abstract class LoadModel<V extends Load> {
 		writer.writeAll(results);
 		writer.close();
 
+	}
+
+	/**
+	 * Set if this LoadModel should report the detailed profiles of each
+	 * constituent load or only the totals.
+	 * 
+	 * @param total
+	 *            a boolean to indicate if the totals only should be calculated.
+	 */
+	public void setTotalsOnly(boolean total) {
+		this.totalOnly = total;
 	}
 
 }
