@@ -1,5 +1,10 @@
 SimElec domestic electricity load profiler simulator
 
+simelec-0.1.2 (xx xx xx)
+===============================
+
+ * Added option to disable occupancy model (API only)
+
 simelec-0.1.1 (25 April 2014)
 ===============================
 

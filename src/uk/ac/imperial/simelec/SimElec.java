@@ -25,6 +25,8 @@
  */
 package uk.ac.imperial.simelec;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -41,7 +43,8 @@ public class SimElec {
 	private String output_dir;
 	private boolean runLighting = true;
 	private boolean runAppliances = true;
-	
+	private boolean runOccupancy = true;
+
 	/**
 	 * Run the simulation.
 	 * 
@@ -164,13 +167,16 @@ public class SimElec {
 	public void run() throws IOException {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
-		occ.run();
+		
+		if (runOccupancy) {		
+			occ.run();
+		}
 
 		if (runLighting) {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
 			lights.run();
 		}
-		
+
 		if (runAppliances) {
 			ApplianceModel appliances = new ApplianceModel(month, weekend,
 					output_dir, occ);
@@ -191,19 +197,51 @@ public class SimElec {
 
 	/**
 	 * Set whether to run the Appliance simulation
-	 *  
-	 * @param run 
+	 * 
+	 * @param run
 	 */
 	public void setRunAppliances(boolean run) {
-		this.runAppliances = run;		
+		this.runAppliances = run;
 	}
 
 	/**
 	 * Set whether to run the Lighting simulation
-	 *  
-	 * @param run 
+	 * 
+	 * @param run
 	 */
 	public void setRunLighting(boolean run) {
-		this.runLighting = run;		
+		this.runLighting = run;
+	}
+
+	/**
+	 * Set whether to run the occupancy simulation. If this is set to false,
+	 * then you must provide the file <code>occupancy_output.csv</code> in the
+	 * output directory.
+	 * 
+	 * @param run
+	 *            should the occupancy model be run?
+	 * 
+	 * @throws FileNotFoundException
+	 *             if occupancy output file is not found
+	 */
+	public void setRunOccupancy(boolean run) throws FileNotFoundException {
+
+		/*
+		 * If we're turning off the occupancy model, then we have to ensure that
+		 * we already have an output file ready to process.
+		 */
+		if (!run) {
+
+			File f = OccupancyModel.getOutputFile(output_dir);
+			if (!f.exists()) {
+				String msg = String.format(
+						"Occupancy model output file '%s' not found.",
+						f.toString());
+				throw new FileNotFoundException(msg);
+			}
+		}
+
+		this.runOccupancy = run;
+
 	}
 }
