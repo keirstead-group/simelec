@@ -126,8 +126,7 @@ public class MainForm implements javafx.fxml.Initializable {
 				}
 				final int month = cal.get(Calendar.MONTH) + 1;
 				final boolean weekend = cbxDayOfWeek.getValue().equals("Weekend");
-				final String out_dir = txfOutdir.getText();
-
+				final String out_dir = txfOutdir.getText();				
 				final boolean runLighting = chbLighting.isSelected();
 				final boolean runAppliances = chbAppliances.isSelected();
 				final boolean runRPlots = chbRPlots.isSelected();

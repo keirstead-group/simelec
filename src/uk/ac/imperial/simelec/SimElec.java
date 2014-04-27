@@ -29,8 +29,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Simulates electricity demand for a single UK household
@@ -40,7 +41,9 @@ import java.nio.file.Paths;
  */
 public class SimElec {
 
-	private static String R_DIRECTORY = "R/";
+	// Data files
+	private static String R_DIRECTORY = "/R";
+
 	private int month;
 	private int residents;
 	private boolean weekend;
@@ -172,8 +175,8 @@ public class SimElec {
 	public void run() throws IOException {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
-		
-		if (runOccupancy) {		
+
+		if (runOccupancy) {
 			occ.run();
 		}
 
@@ -194,6 +197,7 @@ public class SimElec {
 			} catch (Exception e) {
 				System.out.println("Unable to create R plots.");
 				System.out.println(e.getMessage());
+				e.printStackTrace();
 			}
 		}
 
@@ -208,22 +212,48 @@ public class SimElec {
 	 */
 	private void makeRPlots() throws IOException, InterruptedException {
 
-		String dataDir = Paths.get(output_dir).toFile().getAbsolutePath();
+		// First copy the scripts to the working directory
+		File destDir = new File(output_dir, "tmpR");
+		if (!destDir.exists())
+			destDir.mkdirs();
+
+		String fileName;
+		InputStream is = getClass().getResourceAsStream(
+				R_DIRECTORY.concat("/index.txt"));
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		while ((fileName = br.readLine()) != null) {
+			InputStream is2 = getClass().getResourceAsStream(
+					R_DIRECTORY.concat("/").concat(fileName));
+			File outFile = new File(destDir, fileName);
+			FileUtils.copyInputStreamToFile(is2, outFile);
+			is2.close();
+		}
+		br.close();
+
+		// Then figure out where the data and results should go
+		/*
+		 * The awkward construction is a hack to ensure that d: and d:\ behave
+		 * the same
+		 */
+		File dataDir = new File(output_dir, ".").getCanonicalFile();
 		File outputFile = new File(output_dir, "simelec.png");
 
+		// Then run the scripts
 		String cmd = String.format("Rscript make-summary-plot.r %s %s",
 				dataDir, outputFile.getAbsolutePath());
 
-		StringBuffer output = new StringBuffer();
-
 		Process p;
+		StringBuffer output = new StringBuffer();
 		try {
-			p = Runtime.getRuntime().exec(cmd, null, new File(R_DIRECTORY));
-
+			p = Runtime.getRuntime().exec(cmd, null, destDir);
 			p.waitFor();
+
+			/*
+			 * Not going to do anything with this output at the moment
+			 */
+
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
-
 			String line = "";
 			while ((line = reader.readLine()) != null) {
 				output.append(line + "\n");
@@ -231,7 +261,10 @@ public class SimElec {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		}		
+		}
+
+		// Then tidy up
+		FileUtils.deleteDirectory(destDir);
 
 	}
 
@@ -262,16 +295,17 @@ public class SimElec {
 	public void setRunLighting(boolean run) {
 		this.runLighting = run;
 	}
-	
+
 	/**
-	 * Set whether to make the R plots 
+	 * Set whether to make the R plots
 	 * 
-	 * @param makePlots a boolean indicating if the plots should be made
+	 * @param makePlots
+	 *            a boolean indicating if the plots should be made
 	 */
 	public void setMakeRPlots(boolean makePlots) {
 		this.makeRPlots = makePlots;
 	}
-	
+
 	/**
 	 * Set whether to run the occupancy simulation. If this is set to false,
 	 * then you must provide the file <code>occupancy_output.csv</code> in the
