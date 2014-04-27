@@ -57,7 +57,8 @@ public class ApplianceModel {
 	private File out_file;
 	private OccupancyModel model;
 	private List<Appliance> appliances;
-
+	private boolean totalOnly = true;
+	
 	// Data files
 	private static String activity_file = "/data/activities.csv";
 	private static String appliance_file = "/data/appliances.csv";
@@ -342,9 +343,21 @@ public class ApplianceModel {
 	private void writeResults(File file) throws IOException {
 
 		// Write the data back to the simulation sheet
-		ArrayList<String[]> results = new ArrayList<String[]>(appliances.size());
-		for (Load a : appliances) {
-			results.add(a.toExportString());
+		ArrayList<String[]> results;
+		if (totalOnly) {
+			results = new ArrayList<String[]>(1);
+			double[] consumption = new double[1440]; // W
+			for (Load a : appliances) {
+				for (int i = 0; i < consumption.length; i++) {
+					consumption[i]+= a.getConsumption(i+1);  
+				}
+			}
+			results.add(Load.buildExportString("APPLIANCES", consumption));			
+		} else {
+			results = new ArrayList<String[]>(appliances.size());
+			for (Load a : appliances) {
+				results.add(a.toExportString());
+			}
 		}
 
 		// Write the data to a file
