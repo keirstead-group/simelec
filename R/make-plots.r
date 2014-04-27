@@ -8,7 +8,9 @@ require(scales)
 require(ggplot2)
 
 root_dir <- "sample"
+
 source("occupancy.r")
+make_occupancy_plot(root_dir)
 
 source("lighting.r")
 make_lighting_plot(root_dir)
