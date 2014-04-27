@@ -48,7 +48,7 @@
 <children><Button fx:id="btnRunSimElec" alignment="CENTER" layoutX="222.0" layoutY="240.0" mnemonicParsing="false" prefHeight="62.0" prefWidth="131.0" text="Run SimElec">
 <VBox.margin>
 <Insets top="10.0" />
-</VBox.margin></Button><Label fx:id="lblStatus" alignment="CENTER" layoutX="242.0048828125" layoutY="322.5" text=" " />
+</VBox.margin></Button><Label fx:id="lblStatus" alignment="CENTER" layoutX="242.0048828125" layoutY="322.5" minHeight="-Infinity" prefHeight="41.0" text=" " wrapText="true" />
 </children></VBox>
 </children></HBox>
 </children></AnchorPane>

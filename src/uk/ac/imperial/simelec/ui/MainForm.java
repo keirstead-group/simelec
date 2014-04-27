@@ -80,25 +80,26 @@ public class MainForm implements javafx.fxml.Initializable {
 		cbxResidents.setValue(1);
 		cbxMonth.setValue("January");
 		cbxDayOfWeek.setValue("Weekday");
-		
+
 		statusText = new SimpleStringProperty("");
 		lblStatus.textProperty().bind(statusText);
 
 		/*
-		 * Make sure that "total" options grey out when the models are turned off
+		 * Make sure that "total" options grey out when the models are turned
+		 * off
 		 */
-		chbLighting.setOnAction(new EventHandler<ActionEvent> () {
+		chbLighting.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent arg0) {
 				chbLightTotals.setDisable(!chbLighting.isSelected());
-			}			
+			}
 		});
-		
-		chbAppliances.setOnAction(new EventHandler<ActionEvent> () {
+
+		chbAppliances.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent arg0) {
 				chbApplianceTotals.setDisable(!chbAppliances.isSelected());
-			}			
+			}
 		});
-		
+
 		Label menuLabel = new Label("About");
 		menuLabel.setStyle("-fx-padding: 0px;");
 		menuLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -144,46 +145,59 @@ public class MainForm implements javafx.fxml.Initializable {
 					e1.printStackTrace();
 				}
 				final int month = cal.get(Calendar.MONTH) + 1;
-				final boolean weekend = cbxDayOfWeek.getValue().equals("Weekend");
-				final String out_dir = txfOutdir.getText();				
-				final boolean runLighting = chbLighting.isSelected();
-				final boolean runAppliances = chbAppliances.isSelected();
-				final boolean runRPlots = chbRPlots.isSelected();
+				final boolean weekend = cbxDayOfWeek.getValue().equals(
+						"Weekend");
+				final String out_dir = txfOutdir.getText();
 
 				if (out_dir == null || out_dir.equals("")) {
 					lblStatus.setTextFill(Color.RED);
 					lblStatus.setText("Please select an output directory");
-
 				} else {
 
 					lblStatus.setTextFill(Color.BLACK);
-					
+
 					Task<Void> task = new Task<Void>() {
 
 						@Override
 						protected Void call() throws Exception {
 							updateMessage("Starting model run...");
-							
-							SimElec model = new SimElec(month, residents, weekend,
-									out_dir);
+
+							SimElec model = new SimElec(month, residents,
+									weekend, out_dir);
+
+							boolean runLighting = chbLighting.isSelected();
+							boolean runAppliances = chbAppliances.isSelected();
+							boolean runRPlots = chbRPlots.isSelected();
+
 							model.setRunAppliances(runAppliances);
 							model.setRunLighting(runLighting);
+
+							boolean Rdisabled = false;
+							if (!runAppliances && !runLighting && runRPlots) {
+								runRPlots = false;
+								Rdisabled = true;
+							}
+
 							model.setMakeRPlots(runRPlots);
-							model.setLightingTotalsOnly(chbLightTotals.isSelected());
-							model.setAppliancesTotalsOnly(chbApplianceTotals.isSelected());
+							model.setLightingTotalsOnly(chbLightTotals
+									.isSelected());
+							model.setAppliancesTotalsOnly(chbApplianceTotals
+									.isSelected());
 
 							try {
 								model.run();
 							} catch (IOException io) {
 								io.printStackTrace();
 							}
-							
-							updateMessage("Model run complete");
-							
+
+							String msg = Rdisabled ? "Occupancy model complete.\nNo R results."
+									: "Simulation models complete.";
+
+							updateMessage(msg);
 							return null;
 						}
 					};
-					
+
 					lblStatus.textProperty().bind(task.messageProperty());
 
 					Thread thread = new Thread(task);
@@ -193,7 +207,6 @@ public class MainForm implements javafx.fxml.Initializable {
 			}
 		});
 
-		
 	}
 
 	public void setStage(Stage primaryStage) {
