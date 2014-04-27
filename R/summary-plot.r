@@ -2,8 +2,9 @@
 ##'
 ##' @author James Keirstead
 ##' @param dir a character vector specifying the directory containing
+##' @param file the output file name
 ##' the SimElec output files
-make_summary_plot <- function(dir) {
+make_summary_plot <- function(dir, file) {
 
     ## Load in the required code
     source("appliances.r")
@@ -41,7 +42,7 @@ make_summary_plot <- function(dir) {
     newlayer <- geom_area(data=occupancy, aes(x=datetime, y=occ), fill="#999999", alpha=0.5)
     gg <- insertLayer(gg, after=0, newlayer)
 
-    ggsave("simelec.png", gg, width=10, height=6)
+    ggsave(file, gg, width=10, height=6)
 }
 
 ##' Inserts a new layer into a ggplot object at a specified order

@@ -7,7 +7,7 @@
 root_dir <- "sample"
 
 source("summary-plot.r")
-make_summary_plot(root_dir)
+make_summary_plot(root_dir, "simelec.png")
 
 source("occupancy.r")
 make_occupancy_plot(root_dir)
