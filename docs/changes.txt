@@ -5,6 +5,8 @@ simelec-0.1.2 (xx xx xx)
 
  * Added option for generating a summary R plot
  
+ * Added option to disable occupancy model (API only)
+
 simelec-0.1.1 (25 April 2014)
 ===============================
 

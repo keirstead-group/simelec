@@ -27,6 +27,7 @@ package uk.ac.imperial.simelec;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
@@ -47,6 +48,7 @@ public class SimElec {
 	private boolean runLighting = true;
 	private boolean runAppliances = true;
 	private boolean makeRPlots = true;
+	private boolean runOccupancy = true;
 
 	/**
 	 * Run the simulation.
@@ -170,7 +172,10 @@ public class SimElec {
 	public void run() throws IOException {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
-		occ.run();
+		
+		if (runOccupancy) {		
+			occ.run();
+		}
 
 		if (runLighting) {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
@@ -265,5 +270,36 @@ public class SimElec {
 	 */
 	public void setMakeRPlots(boolean makePlots) {
 		this.makeRPlots = makePlots;
+	}
+	
+	/**
+	 * Set whether to run the occupancy simulation. If this is set to false,
+	 * then you must provide the file <code>occupancy_output.csv</code> in the
+	 * output directory.
+	 * 
+	 * @param run
+	 *            should the occupancy model be run?
+	 * 
+	 * @throws FileNotFoundException
+	 *             if occupancy output file is not found
+	 */
+	public void setRunOccupancy(boolean run) throws FileNotFoundException {
+
+		/*
+		 * If we're turning off the occupancy model, then we have to ensure that
+		 * we already have an output file ready to process.
+		 */
+		if (!run) {
+
+			File f = OccupancyModel.getOutputFile(output_dir);
+			if (!f.exists()) {
+				String msg = String.format(
+						"Occupancy model output file '%s' not found.",
+						f.toString());
+				throw new FileNotFoundException(msg);
+			}
+		}
+
+		this.runOccupancy = run;
 	}
 }
