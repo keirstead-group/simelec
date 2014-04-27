@@ -2,7 +2,7 @@
 ## James Keirstead
 ## 22 January 2014
 
-data <- read.csv("../occupancy_output.csv", header=FALSE, stringsAsFactors=FALSE)
+data <- read.csv(file.path(root_dir, "occupancy_output.csv"), header=FALSE, stringsAsFactors=FALSE)
 names(data) <- c("tid", "occupants")
 
 tmp <- data.frame(tid=1:144, datetime=seq(as.POSIXct("2014-01-01 00:00:00"),

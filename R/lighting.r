@@ -2,7 +2,7 @@
 ## James Keirstead
 ## 22 January 2014
 
-data <- read.csv("../lighting_output.csv", header=FALSE, stringsAsFactors=FALSE)
+data <- read.csv(file.path(root_dir, "lighting_output.csv"), header=FALSE, stringsAsFactors=FALSE)
 names(data) <- c("id", "rating", "weight", 1:1440)
 data.m <- melt(data, id="id", variable.name="tid")
 
