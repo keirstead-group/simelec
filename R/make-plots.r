@@ -9,7 +9,9 @@ require(ggplot2)
 
 root_dir <- "sample"
 source("occupancy.r")
+
 source("lighting.r")
+make_lighting_plot(root_dir)
 
 source("appliances.r")
 make_appliances_plot(root_dir)
