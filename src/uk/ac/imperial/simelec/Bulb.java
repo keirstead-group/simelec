@@ -8,13 +8,11 @@ import cern.jet.random.Uniform;
  * @author James Keirstead
  * 
  */
-public class Bulb {
+public class Bulb extends Load {
 
 	// Member fields
-	protected int id;
 	protected int rating; // in Watts
 	protected float weight; // dimensionless
-	private float[] consumption = new float[1440]; // W
 
 	/**
 	 * Create a new Bulb with a specified id, rating, and weighting.
@@ -32,7 +30,8 @@ public class Bulb {
 	 *            light; 0 means it would never be turned on.
 	 */
 	public Bulb(int id, int rating, float weight) {
-		this.id = id;
+		this.id = this.getClass().getSimpleName().toUpperCase().concat("_")
+				.concat(String.valueOf(id));
 		this.rating = rating;
 		this.weight = weight;
 	}
@@ -46,9 +45,7 @@ public class Bulb {
 	 *            an int giving the power consumption in Watts
 	 */
 	public Bulb(int id, int rating) {
-		this.id = id;
-		this.rating = rating;
-		this.weight = Bulb.getCalibratedWeight();
+		this(id, rating, Bulb.getCalibratedWeight());		
 	}
 
 	/**
@@ -90,22 +87,5 @@ public class Bulb {
 		if (t > 0 & t < consumption.length) {
 			this.consumption[t] = this.rating;
 		}
-	}
-
-	/**
-	 * Converts this Bulb object into a formatted String array for export.
-	 * 
-	 * @return a String array containing the Bulb's id, rating, weight, and then
-	 *         1440 entries representing the consumption in Watts at each minute
-	 *         interval.
-	 */
-	public String[] toExportString() {
-		String[] tmp = new String[consumption.length + 3];
-		tmp[0] = String.valueOf(this.id);
-		tmp[1] = String.valueOf(this.rating);
-		tmp[2] = String.valueOf(this.weight);
-		for (int i = 0; i < consumption.length; i++)
-			tmp[i + 3] = String.valueOf(consumption[i]);
-		return tmp;
 	}
 }

@@ -240,7 +240,7 @@ public class SimElec {
 
 		// Then run the scripts
 		String cmd = String.format("Rscript make-summary-plot.r \"%s\" \"%s\"",
-				dataDir, outputFile.getAbsolutePath());
+				dataDir, outputFile.getCanonicalPath());
 
 		Process p;
 		StringBuffer output = new StringBuffer();

@@ -215,7 +215,7 @@ public class ApplianceModel {
 								// at this time step
 								dActivityProbability = pm.modifiers[iTenMinuteCount];
 
-							} else if (a.name.equals("ELEC_SPACE_HEATING")) {
+							} else if (a.id.equals("ELEC_SPACE_HEATING")) {
 								// For electric space heaters ... (excluding
 								// night storage heaters)
 
@@ -236,7 +236,7 @@ public class ApplianceModel {
 
 							}
 						} else if (a.use_profile.equals("CUSTOM")
-								&& a.name.equals("STORAGE_HEATER")) {
+								&& a.id.equals("STORAGE_HEATER")) {
 							// Custom appliance handler: storage heaters have a
 							// simple representation
 							// The number of cycles (one per day) set out in the
@@ -343,7 +343,7 @@ public class ApplianceModel {
 
 		// Write the data back to the simulation sheet
 		ArrayList<String[]> results = new ArrayList<String[]>(appliances.size());
-		for (Appliance a : appliances) {
+		for (Load a : appliances) {
 			results.add(a.toExportString());
 		}
 
