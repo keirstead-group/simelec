@@ -16,21 +16,23 @@ make_summary_plot <- function(dir, file) {
     lights <- get_lighting_data(dir)
     lights <- cbind(id="LIGHTS", lights)
     data <- rbind(power, lights)
-
+    data <- transform(data, value=value/1000)
+    
     ## Build the load data plot
     require(ggplot2)
     require(scales)
-    gg <- ggplot(data, aes(x=datetime, y=value/1000)) +
+    gg <- ggplot(data, aes(x=datetime, y=value)) +
         geom_area(aes(fill=id), position="stack") +
             scale_x_datetime(label=date_format("%H:%M")) +
-                labs(x="Hour of the day", y="Power (kW)", fill="Load") +
+                labs(x="Hour of the day", y="Power (W)", fill="Load") +
                     theme_bw() 
 
-    ## Get the size of this plot
+    ## Get the size of this plot. One way is with
     ## http://stackoverflow.com/questions/7705345/how-can-i-extract-plot-axes-ranges-for-a-ggplot2-object
-    gg.data <- ggplot_build(gg)
-    ylim <- gg.data$panel$ranges[[1]]$y.minor_source
-    ylim <- ylim[c(1, length(ylim))]
+    ## but this is very slow.
+    require(plyr)
+    tmp <- ddply(data, .(datetime), summarize, value=sum(value))
+    ylim <- c(0, max(tmp$value))
 
     ## This can be used to build the occupancy scaling
     occupancy <- get_occupancy_data(dir)
@@ -66,4 +68,4 @@ insertLayer <- function(P, after=0, ...) {
         P$layers <- append(P$layers, list(...), after)
 
       return(P)
-    }
+}

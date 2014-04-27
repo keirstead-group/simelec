@@ -48,11 +48,13 @@ public class SimElec {
 	private int residents;
 	private boolean weekend;
 	private String output_dir;
+	private boolean runOccupancy = true;
 	private boolean runLighting = true;
 	private boolean runAppliances = true;
 	private boolean makeRPlots = true;
-	private boolean runOccupancy = true;
-
+	private boolean applianceTotals = false;
+	private boolean lightingTotals = false;
+	
 	/**
 	 * Run the simulation.
 	 * 
@@ -182,12 +184,14 @@ public class SimElec {
 
 		if (runLighting) {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
+			lights.setTotalsOnly(lightingTotals);
 			lights.run();
 		}
 
 		if (runAppliances) {
 			ApplianceModel appliances = new ApplianceModel(month, weekend,
 					output_dir, occ);
+			appliances.setTotalsOnly(applianceTotals);
 			appliances.run();
 		}
 
@@ -240,7 +244,7 @@ public class SimElec {
 
 		// Then run the scripts
 		String cmd = String.format("Rscript make-summary-plot.r \"%s\" \"%s\"",
-				dataDir, outputFile.getAbsolutePath());
+				dataDir, outputFile.getCanonicalPath());
 
 		Process p;
 		StringBuffer output = new StringBuffer();
@@ -305,7 +309,27 @@ public class SimElec {
 	public void setMakeRPlots(boolean makePlots) {
 		this.makeRPlots = makePlots;
 	}
+	
+	/**
+	 * Set whether to calculate only the total loads for the appliance model.
+	 * 
+	 * @param total
+	 *            a boolean indicating if only the total appliance loads should be reported
+	 */
+	public void setAppliancesTotalsOnly(boolean total) {
+		this.applianceTotals = total;
+	}
 
+	/**
+	 * Set whether to calculate only the total loads for the lighting model.
+	 * 
+	 * @param total
+	 *            a boolean indicating if only the total lighting loads should be reported
+	 */
+	public void setLightingTotalsOnly(boolean total) {
+		this.lightingTotals = total;
+	}
+	
 	/**
 	 * Set whether to run the occupancy simulation. If this is set to false,
 	 * then you must provide the file <code>occupancy_output.csv</code> in the

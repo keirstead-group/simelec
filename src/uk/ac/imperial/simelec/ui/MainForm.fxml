@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="360.0" prefWidth="510.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="uk.ac.imperial.simelec.ui.MainForm">
+<AnchorPane prefHeight="391.0" prefWidth="510.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="uk.ac.imperial.simelec.ui.MainForm">
 <children><MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="510.0" /><GridPane layoutX="15.0" layoutY="14.0" prefHeight="169.0" prefWidth="462.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
   <columnConstraints>
     <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="143.0" minWidth="120.0" prefWidth="143.0" />
@@ -29,7 +29,7 @@
 </font></Label>
 </children>
 </GridPane><HBox layoutX="20.0" layoutY="220.0" prefHeight="134.0" prefWidth="447.0">
-<children><VBox layoutX="14.0" layoutY="231.0" prefHeight="112.0" prefWidth="213.0" spacing="10.0">
+<children><VBox layoutX="14.0" layoutY="231.0" prefHeight="182.0" prefWidth="213.0" spacing="10.0">
 <children><Label layoutX="31.0" layoutY="254.5" text="Model options" AnchorPane.leftAnchor="20.0">
 <font>
 <Font name="System Bold" size="12.0" />
@@ -37,8 +37,14 @@
 <VBox.margin>
 <Insets />
 </VBox.margin>
-</Label><CheckBox fx:id="chbLighting" layoutX="33.2890625" layoutY="286.5" mnemonicParsing="false" selected="true" text="Run Lighting model?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="1" /><CheckBox fx:id="chbAppliances" layoutX="33.0" layoutY="314.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="152.0" selected="true" text="Run Appliance model?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="2" /><CheckBox fx:id="chbRPlots" layoutX="39.0" layoutY="345.0" mnemonicParsing="false" selected="true" text="Make R plots?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="3" />
-</children></VBox><VBox alignment="CENTER" layoutX="371.0" layoutY="285.0" prefHeight="135.0" prefWidth="205.0" spacing="10.0">
+</Label><CheckBox fx:id="chbLighting" layoutX="33.2890625" layoutY="286.5" mnemonicParsing="false" selected="true" text="Run Lighting model?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="1" /><CheckBox fx:id="chbLightTotals" mnemonicParsing="false" text="Totals only?">
+<VBox.margin>
+<Insets left="20.0" />
+</VBox.margin></CheckBox><CheckBox fx:id="chbAppliances" layoutX="33.0" layoutY="314.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="152.0" selected="true" text="Run Appliance model?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="2" /><CheckBox fx:id="chbApplianceTotals" mnemonicParsing="false" text="Totals only?">
+<VBox.margin>
+<Insets left="20.0" />
+</VBox.margin></CheckBox><CheckBox fx:id="chbRPlots" layoutX="39.0" layoutY="345.0" mnemonicParsing="false" selected="true" text="Make R plots?" AnchorPane.leftAnchor="20.0" GridPane.rowIndex="3" />
+</children></VBox><VBox alignment="CENTER" layoutX="371.0" layoutY="285.0" prefHeight="163.0" prefWidth="205.0" spacing="10.0">
 <children><Button fx:id="btnRunSimElec" alignment="CENTER" layoutX="222.0" layoutY="240.0" mnemonicParsing="false" prefHeight="62.0" prefWidth="131.0" text="Run SimElec">
 <VBox.margin>
 <Insets top="10.0" />

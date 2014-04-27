@@ -60,6 +60,10 @@ public class MainForm implements javafx.fxml.Initializable {
 	private Label lblAbout;
 	@FXML
 	private MenuBar menuBar;
+	@FXML
+	private CheckBox chbApplianceTotals;
+	@FXML
+	private CheckBox chbLightTotals;
 
 	private Stage stage;
 	private StringProperty statusText;
@@ -76,9 +80,24 @@ public class MainForm implements javafx.fxml.Initializable {
 		cbxResidents.setValue(1);
 		cbxMonth.setValue("January");
 		cbxDayOfWeek.setValue("Weekday");
-
+		
 		statusText = new SimpleStringProperty("");
 		lblStatus.textProperty().bind(statusText);
+
+		/*
+		 * Make sure that "total" options grey out when the models are turned off
+		 */
+		chbLighting.setOnAction(new EventHandler<ActionEvent> () {
+			public void handle(ActionEvent arg0) {
+				chbLightTotals.setDisable(!chbLighting.isSelected());
+			}			
+		});
+		
+		chbAppliances.setOnAction(new EventHandler<ActionEvent> () {
+			public void handle(ActionEvent arg0) {
+				chbApplianceTotals.setDisable(!chbAppliances.isSelected());
+			}			
+		});
 		
 		Label menuLabel = new Label("About");
 		menuLabel.setStyle("-fx-padding: 0px;");
@@ -150,6 +169,8 @@ public class MainForm implements javafx.fxml.Initializable {
 							model.setRunAppliances(runAppliances);
 							model.setRunLighting(runLighting);
 							model.setMakeRPlots(runRPlots);
+							model.setLightingTotalsOnly(chbLightTotals.isSelected());
+							model.setAppliancesTotalsOnly(chbApplianceTotals.isSelected());
 
 							try {
 								model.run();

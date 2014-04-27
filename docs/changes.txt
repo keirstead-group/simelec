@@ -6,6 +6,11 @@ simelec-0.1.2 (xx xx xx)
  * Added option for generating a summary R plot
  
  * Added option to disable occupancy model (API only)
+ 
+ * Added options for calculating only the totals of each model.  If
+   the option is not selected, then the loads of each appliance or
+   light bulb is reported separately in the output file.  Otherwise,
+   just a single total value for lights or appliances is returned.
 
 simelec-0.1.1 (25 April 2014)
 ===============================

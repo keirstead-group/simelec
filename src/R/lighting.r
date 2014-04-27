@@ -5,7 +5,7 @@
 get_lighting_data <- function(dir) {
     ## Load the data
     data <- read.csv(file.path(dir, "lighting_output.csv"), header=FALSE, stringsAsFactors=FALSE)
-    names(data) <- c("id", "rating", "weight", 1:1440)
+    names(data) <- c("id", 1:1440)
     data.m <- melt(data, id="id", variable.name="tid")
 
     ## Tidy up the time stamps
