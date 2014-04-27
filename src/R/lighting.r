@@ -3,8 +3,15 @@
 ## 22 January 2014
 
 get_lighting_data <- function(dir) {
+
+    ## Check if the data file exists
+    light_file <- file.path(dir, "lighting_output.csv")    
+    if (!file.exists(light_file)) {
+        return(data.frame())
+    }
+    
     ## Load the data
-    data <- read.csv(file.path(dir, "lighting_output.csv"), header=FALSE, stringsAsFactors=FALSE)
+    data <- read.csv(light_file, header=FALSE, stringsAsFactors=FALSE)
     names(data) <- c("id", 1:1440)
     data.m <- melt(data, id="id", variable.name="tid")
 
@@ -18,6 +25,7 @@ get_lighting_data <- function(dir) {
 
     ## Sort by time and return the result    
     data.m <- arrange(data.m, datetime)
+    data.m <- cbind(id="LIGHTS", data.m)
     return(data.m)
 }
 
