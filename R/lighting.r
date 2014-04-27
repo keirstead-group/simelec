@@ -22,13 +22,3 @@ gg <- ggplot(data.m, aes(x=datetime, y=value)) + geom_line() +
 ggsave("lighting.png", gg)
 
 
-## Plot irradiance data
-irradiance <- read.csv("../src/data/irradiance.csv", header=FALSE, skip=8, stringsAsFactors=FALSE)
-month <- 1
-df <- data.frame(time=irradiance$V1, irradiance=irradiance[,2+month])
-gg <- ggplot(df, aes(x=time, y=irradiance)) +
-    geom_line() +
-    labs(x="Minute of the day", y="Irradiance (W/m2")
-
-
-ggsave("irradiance.png", gg)

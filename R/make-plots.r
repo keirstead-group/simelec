@@ -11,3 +11,4 @@ root_dir <- "sample"
 source("occupancy.r")
 source("lighting.r")
 source("appliances.r")
+source("irradiance.r")
