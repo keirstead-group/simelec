@@ -57,6 +57,7 @@ public class LightingModel {
 	private String out_dir;
 	private OccupancyModel occModel;
 	private List<Bulb> bulbs;
+	private boolean totalOnly = true;
 
 	// Data files
 	private static String irradiance_file = "/data/irradiance.csv";
@@ -202,9 +203,9 @@ public class LightingModel {
 		}
 
 		writeResults(out_file);
-	
+
 	}
-	
+
 	/**
 	 * Writes the results of this LightingModel to a specified File
 	 * 
@@ -215,9 +216,22 @@ public class LightingModel {
 	 */
 	private void writeResults(File file) throws IOException {
 
-		ArrayList<String[]> results = new ArrayList<String[]>(bulbs.size());
-		for (Bulb b : bulbs) {
-			results.add(b.toExportString());
+		// Write the data back to the simulation sheet
+		ArrayList<String[]> results;
+		if (totalOnly) {
+			results = new ArrayList<String[]>(1);
+			double[] consumption = new double[1440]; // W
+			for (Load b : bulbs) {
+				for (int i = 0; i < consumption.length; i++) {
+					consumption[i] += b.getConsumption(i + 1);
+				}
+			}
+			results.add(Load.buildExportString("LIGHTS", consumption));
+		} else {
+			results = new ArrayList<String[]>(bulbs.size());
+			for (Load b : bulbs) {
+				results.add(b.toExportString());
+			}
 		}
 
 		// Save the result to a CSV file
@@ -312,8 +326,8 @@ public class LightingModel {
 	private int[] getIrradianceData(int month) throws IOException {
 
 		InputStream is = this.getClass().getResourceAsStream(irradiance_file);
-		CSVReader reader = new CSVReader(new InputStreamReader(is),
-				',', '\'', 8);
+		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'',
+				8);
 		List<String[]> myEntries = reader.readAll();
 		reader.close();
 
