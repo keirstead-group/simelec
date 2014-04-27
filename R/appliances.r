@@ -23,7 +23,9 @@ get_appliance_data <- function(dir) {
     tmp <- ddply(data.m, .(id), summarize, total=sum(value))
     bad_id <- subset(tmp, total==0)$id
     data.m <- subset(data.m, !is.element(id, bad_id))
-
+    data.m <- data.m[,-1] ## Drop tid column
+    data.m <- data.m[,c("id", "datetime", "value")]
+    
     ## Arrange in date order and return
     data.m <- arrange(data.m, datetime)
     return(data.m)

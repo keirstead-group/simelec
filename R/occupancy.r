@@ -12,6 +12,8 @@ get_occupancy_data <- function(dir) {
                                   as.POSIXct("2014-01-01 23:59:00"), by="10 min"))
 
     data <- merge(data, tmp, by="tid")
+    data <- data[,-1]
+    data <- data[,c("datetime", "occupants")]
     return(data)
 }
 
