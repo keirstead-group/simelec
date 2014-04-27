@@ -239,7 +239,7 @@ public class SimElec {
 		File outputFile = new File(output_dir, "simelec.png");
 
 		// Then run the scripts
-		String cmd = String.format("Rscript make-summary-plot.r %s %s",
+		String cmd = String.format("Rscript make-summary-plot.r \"%s\" \"%s\"",
 				dataDir, outputFile.getAbsolutePath());
 
 		Process p;
