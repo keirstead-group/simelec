@@ -9,7 +9,10 @@ import java.util.Calendar;
 import java.util.ResourceBundle;
 
 import uk.ac.imperial.simelec.SimElec;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -59,6 +62,7 @@ public class MainForm implements javafx.fxml.Initializable {
 	private MenuBar menuBar;
 
 	private Stage stage;
+	private StringProperty statusText;
 
 	public void initialize(URL location, ResourceBundle resources) {
 
@@ -73,6 +77,9 @@ public class MainForm implements javafx.fxml.Initializable {
 		cbxMonth.setValue("January");
 		cbxDayOfWeek.setValue("Weekday");
 
+		statusText = new SimpleStringProperty("");
+		lblStatus.textProperty().bind(statusText);
+		
 		Label menuLabel = new Label("About");
 		menuLabel.setStyle("-fx-padding: 0px;");
 		menuLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -109,7 +116,7 @@ public class MainForm implements javafx.fxml.Initializable {
 
 		btnRunSimElec.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-				int residents = cbxResidents.getValue();
+				final int residents = cbxResidents.getValue();
 				String strMonth = cbxMonth.getValue();
 				Calendar cal = Calendar.getInstance();
 				try {
@@ -117,13 +124,13 @@ public class MainForm implements javafx.fxml.Initializable {
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}
-				int month = cal.get(Calendar.MONTH) + 1;
-				boolean weekend = cbxDayOfWeek.getValue().equals("Weekend");
-				String out_dir = txfOutdir.getText();
+				final int month = cal.get(Calendar.MONTH) + 1;
+				final boolean weekend = cbxDayOfWeek.getValue().equals("Weekend");
+				final String out_dir = txfOutdir.getText();
 
-				boolean runLighting = chbLighting.isSelected();
-				boolean runAppliances = chbAppliances.isSelected();
-				// boolean runRPlots = chbRPlots.isSelected();
+				final boolean runLighting = chbLighting.isSelected();
+				final boolean runAppliances = chbAppliances.isSelected();
+				final boolean runRPlots = chbRPlots.isSelected();
 
 				if (out_dir == null || out_dir.equals("")) {
 					lblStatus.setTextFill(Color.RED);
@@ -131,25 +138,42 @@ public class MainForm implements javafx.fxml.Initializable {
 
 				} else {
 
-					SimElec model = new SimElec(month, residents, weekend,
-							out_dir);
-					model.setRunAppliances(runAppliances);
-					model.setRunLighting(runLighting);
-					// model.makeRplots(runRPlots);
-
-					try {
-						model.run();
-					} catch (IOException io) {
-						io.printStackTrace();
-					}
-
 					lblStatus.setTextFill(Color.BLACK);
-					lblStatus.setText("Model run complete");
+					
+					Task<Void> task = new Task<Void>() {
+
+						@Override
+						protected Void call() throws Exception {
+							updateMessage("Starting model run...");
+							
+							SimElec model = new SimElec(month, residents, weekend,
+									out_dir);
+							model.setRunAppliances(runAppliances);
+							model.setRunLighting(runLighting);
+							model.setMakeRPlots(runRPlots);
+
+							try {
+								model.run();
+							} catch (IOException io) {
+								io.printStackTrace();
+							}
+							
+							updateMessage("Model run complete");
+							
+							return null;
+						}
+					};
+					
+					lblStatus.textProperty().bind(task.messageProperty());
+
+					Thread thread = new Thread(task);
+					thread.setDaemon(true);
+					thread.start();
 				}
 			}
 		});
 
-		chbRPlots.setDisable(true);
+		
 	}
 
 	public void setStage(Stage primaryStage) {

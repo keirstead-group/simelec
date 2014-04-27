@@ -25,7 +25,11 @@
  */
 package uk.ac.imperial.simelec;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Paths;
 
 /**
  * Simulates electricity demand for a single UK household
@@ -35,13 +39,15 @@ import java.io.IOException;
  */
 public class SimElec {
 
+	private static String R_DIRECTORY = "R/";
 	private int month;
 	private int residents;
 	private boolean weekend;
 	private String output_dir;
 	private boolean runLighting = true;
 	private boolean runAppliances = true;
-	
+	private boolean makeRPlots = true;
+
 	/**
 	 * Run the simulation.
 	 * 
@@ -170,12 +176,57 @@ public class SimElec {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
 			lights.run();
 		}
-		
+
 		if (runAppliances) {
 			ApplianceModel appliances = new ApplianceModel(month, weekend,
 					output_dir, occ);
 			appliances.run();
 		}
+
+		if (makeRPlots) {
+			try {
+				makeRPlots();
+			} catch (Exception e) {
+				System.out.println("Unable to create R plots.");
+				System.out.println(e.getMessage());
+			}
+		}
+
+	}
+
+	/**
+	 * Runs an R script to generate a summary plot
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * 
+	 */
+	private void makeRPlots() throws IOException, InterruptedException {
+
+		String dataDir = Paths.get(output_dir).toFile().getAbsolutePath();
+		File outputFile = new File(output_dir, "simelec.png");
+
+		String cmd = String.format("Rscript make-summary-plot.r %s %s",
+				dataDir, outputFile.getAbsolutePath());
+
+		StringBuffer output = new StringBuffer();
+
+		Process p;
+		try {
+			p = Runtime.getRuntime().exec(cmd, null, new File(R_DIRECTORY));
+
+			p.waitFor();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					p.getInputStream()));
+
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				output.append(line + "\n");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 
 	}
 
@@ -191,19 +242,28 @@ public class SimElec {
 
 	/**
 	 * Set whether to run the Appliance simulation
-	 *  
-	 * @param run 
+	 * 
+	 * @param run
 	 */
 	public void setRunAppliances(boolean run) {
-		this.runAppliances = run;		
+		this.runAppliances = run;
 	}
 
 	/**
 	 * Set whether to run the Lighting simulation
-	 *  
-	 * @param run 
+	 * 
+	 * @param run
 	 */
 	public void setRunLighting(boolean run) {
-		this.runLighting = run;		
+		this.runLighting = run;
+	}
+	
+	/**
+	 * Set whether to make the R plots 
+	 * 
+	 * @param makePlots a boolean indicating if the plots should be made
+	 */
+	public void setMakeRPlots(boolean makePlots) {
+		this.makeRPlots = makePlots;
 	}
 }
