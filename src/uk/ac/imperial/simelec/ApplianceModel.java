@@ -56,6 +56,7 @@ public class ApplianceModel {
 	private String out_dir;
 	private File out_file;
 	private OccupancyModel model;
+	private List<Appliance> appliances;
 
 	// Data files
 	private static String activity_file = "/data/activities.csv";
@@ -153,7 +154,7 @@ public class ApplianceModel {
 
 		// Load in the basic data
 		List<ProbabilityModifier> activities = loadActivityStatistics();
-		List<Appliance> appliances = loadAppliances();
+		appliances = loadAppliances();
 
 		// Assign the appliances to households
 		configure_appliances(appliances);
@@ -325,19 +326,32 @@ public class ApplianceModel {
 			}
 		}
 
+		// Write the results to a CSV file
+		writeResults(out_file);
+
+	}
+
+	/**
+	 * Writes the results of this ApplianceModel to a specified File
+	 * 
+	 * @param file
+	 *            the file on which to write the results
+	 * @throws IOException
+	 *             if there are problems writing the results to file
+	 */
+	private void writeResults(File file) throws IOException {
+
 		// Write the data back to the simulation sheet
 		ArrayList<String[]> results = new ArrayList<String[]>(appliances.size());
 		for (Appliance a : appliances) {
 			results.add(a.toExportString());
 		}
 
-		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(this.out_file), ',',
-				'\0');
+		// Write the data to a file
+		CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '\0');
 		writer.writeAll(results);
 		writer.close();
 
-		// System.out.println("done.");
 	}
 
 	/**
@@ -371,7 +385,7 @@ public class ApplianceModel {
 				return (pm);
 			}
 		}
-				
+
 		return null;
 	}
 
@@ -396,13 +410,14 @@ public class ApplianceModel {
 	private List<ProbabilityModifier> loadActivityStatistics()
 			throws IOException {
 		InputStream is = this.getClass().getResourceAsStream(activity_file);
-		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'', 6);
+		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'',
+				6);
 		List<String[]> activities = reader.readAll();
 		reader.close();
 		List<ProbabilityModifier> result = new ArrayList<ProbabilityModifier>();
 		for (String[] s : activities) {
 			int bool = Integer.valueOf(s[0]);
-			boolean weekend = (bool==1);
+			boolean weekend = (bool == 1);
 			int occupants = Integer.valueOf(s[1]);
 			String ID = s[2].toUpperCase();
 
@@ -429,7 +444,8 @@ public class ApplianceModel {
 	private List<Appliance> loadAppliances() throws IOException {
 
 		InputStream is = this.getClass().getResourceAsStream(appliance_file);
-		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'', 37);
+		CSVReader reader = new CSVReader(new InputStreamReader(is), ',', '\'',
+				37);
 		List<String[]> appliances = reader.readAll();
 		reader.close();
 		List<Appliance> results = new ArrayList<Appliance>();
@@ -488,6 +504,6 @@ public class ApplianceModel {
 	public static void setSeed(int seed) {
 		// This will also apply to the static method of other distributions
 		RandomEngine engine = new MersenneTwister(seed);
-		Uniform.staticSetRandomEngine(engine);		
+		Uniform.staticSetRandomEngine(engine);
 	}
 }
