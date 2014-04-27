@@ -4,10 +4,10 @@
 ##' 11 March 2014
 ##'
 
-require(scales)
-require(ggplot2)
-
 root_dir <- "sample"
+
+source("summary-plot.r")
+make_summary_plot(root_dir)
 
 source("occupancy.r")
 make_occupancy_plot(root_dir)
