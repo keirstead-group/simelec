@@ -8,9 +8,9 @@ simelec-0.1.2 (xx xx xx)
  * Added option to disable occupancy model (API only)
  
  * Added options for calculating only the totals of each model.  If
-   the option is not selected, then the loads of each appliance or
-   light bulb is reported separately in the output file.  Otherwise,
-   just a single total value for lights or appliances is returned.
+   the option is selected, then a single total demand value is
+   returned. Otherwise, the loads of each appliance or light bulb is
+   reported separately in the output file.  
 
 simelec-0.1.1 (25 April 2014)
 ===============================

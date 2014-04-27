@@ -8,8 +8,14 @@
 ##' @return a data frame
 get_appliance_data <- function(dir) {
 
+    ## Check if the data file exists
+    apps_file <- file.path(dir, "appliance_output.csv")   
+    if (!file.exists(apps_file)) {
+        return(data.frame())
+    }
+
     ## Load the data
-    data <- read.csv(file.path(dir, "appliance_output.csv"), header=FALSE, stringsAsFactors=FALSE)
+    data <- read.csv(apps_file, header=FALSE, stringsAsFactors=FALSE)
     names(data) <- c("id", 1:1440)
     data.m <- melt(data, id="id", variable.name="tid")
 

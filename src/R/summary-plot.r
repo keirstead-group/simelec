@@ -14,7 +14,6 @@ make_summary_plot <- function(dir, file) {
     ## Get the data
     power <- get_appliance_data(dir)
     lights <- get_lighting_data(dir)
-    lights <- cbind(id="LIGHTS", lights)
     data <- rbind(power, lights)
     data <- transform(data, value=value/1000)
     
