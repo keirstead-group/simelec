@@ -56,6 +56,7 @@ public class LightingModel {
 	private File out_file;
 	private String out_dir;
 	private OccupancyModel occModel;
+	private List<Bulb> bulbs;
 
 	// Data files
 	private static String irradiance_file = "/data/irradiance.csv";
@@ -144,8 +145,6 @@ public class LightingModel {
 	 */
 	public void run() throws IOException {
 
-		// System.out.print("Running lighting model...");
-
 		// Ensure the output directory exists
 		File dir = new File(this.out_dir);
 		if (!dir.isDirectory())
@@ -156,7 +155,7 @@ public class LightingModel {
 				this.mean_irradiance, this.sd_irradiance);
 
 		// Calculate the number of bulbs in the household
-		List<Bulb> bulbs = getBulbs();
+		bulbs = getBulbs();
 		int[] irradiance = getIrradianceData(month);
 
 		int[] occupancy = occModel.getOccupancy();
@@ -202,17 +201,30 @@ public class LightingModel {
 			}
 		}
 
+		writeResults(out_file);
+	
+	}
+	
+	/**
+	 * Writes the results of this LightingModel to a specified File
+	 * 
+	 * @param file
+	 *            the file on which to write the results
+	 * @throws IOException
+	 *             if there are problems writing the results to file
+	 */
+	private void writeResults(File file) throws IOException {
+
 		ArrayList<String[]> results = new ArrayList<String[]>(bulbs.size());
 		for (Bulb b : bulbs) {
 			results.add(b.toExportString());
 		}
 
 		// Save the result to a CSV file
-		CSVWriter writer = new CSVWriter(new FileWriter(out_file), ',', '\0');
+		CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '\0');
 		writer.writeAll(results);
 		writer.close();
 
-		// System.out.println("done.");
 	}
 
 	/**
