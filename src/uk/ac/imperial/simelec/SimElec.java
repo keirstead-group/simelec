@@ -28,10 +28,15 @@ package uk.ac.imperial.simelec;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 import org.apache.commons.io.FileUtils;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * Simulates electricity demand for a single UK household
@@ -54,6 +59,7 @@ public class SimElec {
 	private boolean makeRPlots = true;
 	private boolean applianceTotals = false;
 	private boolean lightingTotals = false;
+	private boolean grandTotals = false;
 	
 	/**
 	 * Run the simulation.
@@ -178,6 +184,16 @@ public class SimElec {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
 
+		// If the grand totals option is selected, then make sure
+		// the lighting and appliance models run in total mode
+		double[] totalConsumption = new double[1440];
+		if (grandTotals) {
+			lightingTotals = true;
+			applianceTotals = true;
+			runLighting = true;
+			runAppliances = true;
+		}
+		
 		if (runOccupancy) {
 			occ.run();
 		}
@@ -186,6 +202,11 @@ public class SimElec {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
 			lights.setTotalsOnly(lightingTotals);
 			lights.run();
+			
+			if (grandTotals) {
+				totalConsumption = lights.getTotalConsumption();
+			}
+			
 		}
 
 		if (runAppliances) {
@@ -193,8 +214,28 @@ public class SimElec {
 					output_dir, occ);
 			appliances.setTotalsOnly(applianceTotals);
 			appliances.run();
+			
+			if (grandTotals) {
+				double[] appConsumption = appliances.getTotalConsumption();
+				for (int i = 0; i<totalConsumption.length; i++) {
+					totalConsumption[i]+=appConsumption[i];
+				}				
+			}
 		}
 
+		if (grandTotals) {
+			// Build the results array (only one line)
+			ArrayList<String[]> results = new ArrayList<String[]>(1);
+			String[] totalString = Load.buildExportString("TOTAL", totalConsumption);
+			results.add(totalString);
+
+			// Write the data to a file
+			File file = new File(output_dir, "totals.csv");
+			CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '\0');
+			writer.writeAll(results);
+			writer.close();
+		}
+		
 		if (makeRPlots) {
 			try {
 				makeRPlots();

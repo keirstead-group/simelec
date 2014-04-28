@@ -24,6 +24,7 @@ public abstract class LoadModel<V extends Load> {
 	protected OccupancyModel model;
 	protected List<V> loads;
 	protected boolean totalOnly = true;
+	protected double[] totalConsumption; // W
 
 	/**
 	 * Create a new LoadModel specifying various parameters
@@ -86,16 +87,17 @@ public abstract class LoadModel<V extends Load> {
 		ArrayList<String[]> results;
 		if (totalOnly) {
 			results = new ArrayList<String[]>(1);
-			double[] consumption = new double[1440]; // W
+			totalConsumption = new double[1440]; // W
 			for (Load l : loads) {
-				for (int i = 0; i < consumption.length; i++) {
-					consumption[i] += l.getConsumption(i + 1);
+				for (int i = 0; i < totalConsumption.length; i++) {
+					totalConsumption[i] += l.getConsumption(i + 1);
 				}
 			}
 
 			String label = this.getClass().getSimpleName()
 					.replaceFirst("Model", "");
-			results.add(Load.buildExportString(label.toUpperCase(), consumption));
+			results.add(Load.buildExportString(label.toUpperCase(),
+					totalConsumption));
 		} else {
 			results = new ArrayList<String[]>(loads.size());
 			for (Load a : loads) {
@@ -119,6 +121,16 @@ public abstract class LoadModel<V extends Load> {
 	 */
 	public void setTotalsOnly(boolean total) {
 		this.totalOnly = total;
+	}
+
+	/**
+	 * Gets the total load profile from this LoadModel.
+	 * 
+	 * @return an array of length 1440 giving minute-by-minute electricity loads
+	 *         (W)
+	 */
+	public double[] getTotalConsumption() {
+		return totalConsumption;
 	}
 
 }
