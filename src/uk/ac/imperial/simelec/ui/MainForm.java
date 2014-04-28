@@ -64,6 +64,8 @@ public class MainForm implements javafx.fxml.Initializable {
 	private CheckBox chbApplianceTotals;
 	@FXML
 	private CheckBox chbLightTotals;
+	@FXML
+	private CheckBox chbGrandTotals;
 
 	private Stage stage;
 	private StringProperty statusText;
@@ -168,10 +170,11 @@ public class MainForm implements javafx.fxml.Initializable {
 							boolean runLighting = chbLighting.isSelected();
 							boolean runAppliances = chbAppliances.isSelected();
 							boolean runRPlots = chbRPlots.isSelected();
-
+							
 							model.setRunAppliances(runAppliances);
 							model.setRunLighting(runLighting);
-
+							model.setCalculateGrandTotals(chbGrandTotals.isSelected());
+							
 							boolean Rdisabled = false;
 							if (!runAppliances && !runLighting && runRPlots) {
 								runRPlots = false;

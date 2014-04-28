@@ -56,11 +56,11 @@ public class SimElec {
 	private boolean runOccupancy = true;
 	private boolean runLighting = true;
 	private boolean runAppliances = true;
-	private boolean makeRPlots = true;
+	private boolean makeRPlots = false;
 	private boolean applianceTotals = false;
 	private boolean lightingTotals = false;
-	private boolean grandTotals = false;
-	
+	private boolean grandTotals = true;
+
 	/**
 	 * Run the simulation.
 	 * 
@@ -187,13 +187,7 @@ public class SimElec {
 		// If the grand totals option is selected, then make sure
 		// the lighting and appliance models run in total mode
 		double[] totalConsumption = new double[1440];
-		if (grandTotals) {
-			lightingTotals = true;
-			applianceTotals = true;
-			runLighting = true;
-			runAppliances = true;
-		}
-		
+
 		if (runOccupancy) {
 			occ.run();
 		}
@@ -202,11 +196,12 @@ public class SimElec {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
 			lights.setTotalsOnly(lightingTotals);
 			lights.run();
-			
+
 			if (grandTotals) {
-				totalConsumption = lights.getTotalConsumption();
+				totalConsumption = addArrays(totalConsumption,
+						lights.getTotalConsumption());
 			}
-			
+
 		}
 
 		if (runAppliances) {
@@ -214,19 +209,18 @@ public class SimElec {
 					output_dir, occ);
 			appliances.setTotalsOnly(applianceTotals);
 			appliances.run();
-			
+
 			if (grandTotals) {
-				double[] appConsumption = appliances.getTotalConsumption();
-				for (int i = 0; i<totalConsumption.length; i++) {
-					totalConsumption[i]+=appConsumption[i];
-				}				
+				totalConsumption = addArrays(totalConsumption,
+						appliances.getTotalConsumption());
 			}
 		}
 
 		if (grandTotals) {
 			// Build the results array (only one line)
 			ArrayList<String[]> results = new ArrayList<String[]>(1);
-			String[] totalString = Load.buildExportString("TOTAL", totalConsumption);
+			String[] totalString = Load.buildExportString("TOTAL",
+					totalConsumption);
 			results.add(totalString);
 
 			// Write the data to a file
@@ -235,7 +229,7 @@ public class SimElec {
 			writer.writeAll(results);
 			writer.close();
 		}
-		
+
 		if (makeRPlots) {
 			try {
 				makeRPlots();
@@ -246,6 +240,32 @@ public class SimElec {
 			}
 		}
 
+	}
+
+	/**
+	 * Performs an element-wise addition of two arrays
+	 * 
+	 * @param a
+	 *            the first array
+	 * @param b
+	 *            the second array
+	 * @return the sum array
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the arrays are not of equal length
+	 */
+	private static double[] addArrays(double[] a, double[] b) {
+
+		if (a.length != b.length) {
+			throw new IllegalArgumentException("Arrays must be of equal length");
+		}
+		
+		double[] c = new double[a.length];
+		for (int i = 0; i < c.length; i++) {
+			c[i] = a[i] + b[i];
+		}
+		
+		return c;
 	}
 
 	/**
@@ -350,12 +370,13 @@ public class SimElec {
 	public void setMakeRPlots(boolean makePlots) {
 		this.makeRPlots = makePlots;
 	}
-	
+
 	/**
 	 * Set whether to calculate only the total loads for the appliance model.
 	 * 
 	 * @param total
-	 *            a boolean indicating if only the total appliance loads should be reported
+	 *            a boolean indicating if only the total appliance loads should
+	 *            be reported
 	 */
 	public void setAppliancesTotalsOnly(boolean total) {
 		this.applianceTotals = total;
@@ -365,10 +386,21 @@ public class SimElec {
 	 * Set whether to calculate only the total loads for the lighting model.
 	 * 
 	 * @param total
-	 *            a boolean indicating if only the total lighting loads should be reported
+	 *            a boolean indicating if only the total lighting loads should
+	 *            be reported
 	 */
 	public void setLightingTotalsOnly(boolean total) {
 		this.lightingTotals = total;
+	}
+
+	/**
+	 * Set whether to calculate the grand total of all load models.
+	 * 
+	 * @param total
+	 *            a boolean indicating if the grand totals should be reported
+	 */
+	public void setCalculateGrandTotals(boolean total) {
+		this.grandTotals = total;
 	}
 	
 	/**

@@ -83,17 +83,22 @@ public abstract class LoadModel<V extends Load> {
 	 */
 	private void writeResults(File file) throws IOException {
 
+		/*
+		 *  Calculate the totals.  We do this even if the total flag
+		 *  isn't set because someone might ask for the grand total.
+		 */
+		totalConsumption = new double[1440]; // W
+		for (Load l : loads) {
+			for (int i = 0; i < totalConsumption.length; i++) {
+				totalConsumption[i] += l.getConsumption(i + 1);
+			}
+		}
+
+		
 		// Write the data back to the simulation sheet
 		ArrayList<String[]> results;
 		if (totalOnly) {
 			results = new ArrayList<String[]>(1);
-			totalConsumption = new double[1440]; // W
-			for (Load l : loads) {
-				for (int i = 0; i < totalConsumption.length; i++) {
-					totalConsumption[i] += l.getConsumption(i + 1);
-				}
-			}
-
 			String label = this.getClass().getSimpleName()
 					.replaceFirst("Model", "");
 			results.add(Load.buildExportString(label.toUpperCase(),
