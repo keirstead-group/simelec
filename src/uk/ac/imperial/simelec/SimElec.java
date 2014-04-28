@@ -60,6 +60,7 @@ public class SimElec {
 	private boolean applianceTotals = false;
 	private boolean lightingTotals = false;
 	private boolean grandTotals = true;
+	private double[] totalConsumption = new double[1440];
 
 	/**
 	 * Run the simulation.
@@ -184,10 +185,6 @@ public class SimElec {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
 
-		// If the grand totals option is selected, then make sure
-		// the lighting and appliance models run in total mode
-		double[] totalConsumption = new double[1440];
-
 		if (runOccupancy) {
 			occ.run();
 		}
@@ -259,12 +256,12 @@ public class SimElec {
 		if (a.length != b.length) {
 			throw new IllegalArgumentException("Arrays must be of equal length");
 		}
-		
+
 		double[] c = new double[a.length];
 		for (int i = 0; i < c.length; i++) {
 			c[i] = a[i] + b[i];
 		}
-		
+
 		return c;
 	}
 
@@ -402,7 +399,7 @@ public class SimElec {
 	public void setCalculateGrandTotals(boolean total) {
 		this.grandTotals = total;
 	}
-	
+
 	/**
 	 * Set whether to run the occupancy simulation. If this is set to false,
 	 * then you must provide the file <code>occupancy_output.csv</code> in the
@@ -433,4 +430,15 @@ public class SimElec {
 
 		this.runOccupancy = run;
 	}
+
+	/**
+	 * Gets the total load profile from this SimElec simulation.
+	 * 
+	 * @return an array of length 1440 giving minute-by-minute electricity loads
+	 *         (W)
+	 */
+	public double[] getGrandTotals() {
+		return totalConsumption;
+	}
+	
 }
