@@ -28,10 +28,15 @@ package uk.ac.imperial.simelec;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 import org.apache.commons.io.FileUtils;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * Simulates electricity demand for a single UK household
@@ -51,10 +56,11 @@ public class SimElec {
 	private boolean runOccupancy = true;
 	private boolean runLighting = true;
 	private boolean runAppliances = true;
-	private boolean makeRPlots = true;
+	private boolean makeRPlots = false;
 	private boolean applianceTotals = false;
 	private boolean lightingTotals = false;
-	
+	private boolean grandTotals = true;
+
 	/**
 	 * Run the simulation.
 	 * 
@@ -178,6 +184,10 @@ public class SimElec {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
 
+		// If the grand totals option is selected, then make sure
+		// the lighting and appliance models run in total mode
+		double[] totalConsumption = new double[1440];
+
 		if (runOccupancy) {
 			occ.run();
 		}
@@ -186,6 +196,12 @@ public class SimElec {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
 			lights.setTotalsOnly(lightingTotals);
 			lights.run();
+
+			if (grandTotals) {
+				totalConsumption = addArrays(totalConsumption,
+						lights.getTotalConsumption());
+			}
+
 		}
 
 		if (runAppliances) {
@@ -193,6 +209,25 @@ public class SimElec {
 					output_dir, occ);
 			appliances.setTotalsOnly(applianceTotals);
 			appliances.run();
+
+			if (grandTotals) {
+				totalConsumption = addArrays(totalConsumption,
+						appliances.getTotalConsumption());
+			}
+		}
+
+		if (grandTotals) {
+			// Build the results array (only one line)
+			ArrayList<String[]> results = new ArrayList<String[]>(1);
+			String[] totalString = Load.buildExportString("TOTAL",
+					totalConsumption);
+			results.add(totalString);
+
+			// Write the data to a file
+			File file = new File(output_dir, "totals.csv");
+			CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '\0');
+			writer.writeAll(results);
+			writer.close();
 		}
 
 		if (makeRPlots) {
@@ -205,6 +240,32 @@ public class SimElec {
 			}
 		}
 
+	}
+
+	/**
+	 * Performs an element-wise addition of two arrays
+	 * 
+	 * @param a
+	 *            the first array
+	 * @param b
+	 *            the second array
+	 * @return the sum array
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the arrays are not of equal length
+	 */
+	private static double[] addArrays(double[] a, double[] b) {
+
+		if (a.length != b.length) {
+			throw new IllegalArgumentException("Arrays must be of equal length");
+		}
+		
+		double[] c = new double[a.length];
+		for (int i = 0; i < c.length; i++) {
+			c[i] = a[i] + b[i];
+		}
+		
+		return c;
 	}
 
 	/**
@@ -309,12 +370,13 @@ public class SimElec {
 	public void setMakeRPlots(boolean makePlots) {
 		this.makeRPlots = makePlots;
 	}
-	
+
 	/**
 	 * Set whether to calculate only the total loads for the appliance model.
 	 * 
 	 * @param total
-	 *            a boolean indicating if only the total appliance loads should be reported
+	 *            a boolean indicating if only the total appliance loads should
+	 *            be reported
 	 */
 	public void setAppliancesTotalsOnly(boolean total) {
 		this.applianceTotals = total;
@@ -324,10 +386,21 @@ public class SimElec {
 	 * Set whether to calculate only the total loads for the lighting model.
 	 * 
 	 * @param total
-	 *            a boolean indicating if only the total lighting loads should be reported
+	 *            a boolean indicating if only the total lighting loads should
+	 *            be reported
 	 */
 	public void setLightingTotalsOnly(boolean total) {
 		this.lightingTotals = total;
+	}
+
+	/**
+	 * Set whether to calculate the grand total of all load models.
+	 * 
+	 * @param total
+	 *            a boolean indicating if the grand totals should be reported
+	 */
+	public void setCalculateGrandTotals(boolean total) {
+		this.grandTotals = total;
 	}
 	
 	/**
