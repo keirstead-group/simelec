@@ -23,7 +23,7 @@ make_summary_plot <- function(dir, file) {
     gg <- ggplot(data, aes(x=datetime, y=value)) +
         geom_area(aes(fill=id), position="stack") +
             scale_x_datetime(label=date_format("%H:%M")) +
-                labs(x="Hour of the day", y="Power (W)", fill="Load") +
+                labs(x="Hour of the day", y="Power (kW)", fill="Load") +
                     theme_bw() 
 
     ## Get the size of this plot. One way is with
