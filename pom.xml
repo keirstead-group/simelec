@@ -37,6 +37,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>**/version.txt</include>
+					<include>**/changes.txt</include>
 					<include>**/README.md</include>
 				</includes>
 			</resource>
@@ -45,6 +46,7 @@
 				<filtering>false</filtering>
 				<excludes>
 					<exclude>**/version.txt</exclude>
+					<exclude>**/changes.txt</exclude>
 					<exclude>**/readme.MD</exclude>
 				</excludes>
 			</resource>

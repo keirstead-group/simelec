@@ -4,16 +4,10 @@
 </formats>
 <fileSets>
   <fileSet>
-  	<directory>${project.basedir}/docs</directory>
-    <outputDirectory>/</outputDirectory>
-  	<includes>
-      <include>changes.txt</include>
-    </includes>    
-  </fileSet>
-  <fileSet>
   	<directory>${project.basedir}/target/classes/</directory>
     <outputDirectory>/</outputDirectory>
   	<includes>
+  	  <include>changes.txt</include>
       <include>README.md</include>
     </includes>    
   </fileSet>
