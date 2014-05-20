@@ -47,7 +47,7 @@
 				<excludes>
 					<exclude>**/version.txt</exclude>
 					<exclude>**/changes.txt</exclude>
-					<exclude>**/readme.MD</exclude>
+					<exclude>**/README.md</exclude>
 				</excludes>
 			</resource>
 		</resources>
