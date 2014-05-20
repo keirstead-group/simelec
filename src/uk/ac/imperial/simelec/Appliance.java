@@ -9,11 +9,10 @@ import cern.jet.random.Uniform;
  * @author James Keirstead
  * 
  */
-public class Appliance {
+public class Appliance extends Load {
 
 	// Member fields
-	public int power;
-	String name;
+	public int power;	
 	String use_profile;
 	private double ownership_rate;
 	int standby_power;
@@ -26,7 +25,7 @@ public class Appliance {
 	private boolean owned = false;
 	private int cycle_time_left = 0;
 	int restart_delay_time_left = 0;
-	protected double[] consumption = new double[1440]; // W
+	
 
 	/**
 	 * Creates a new appliance with specified attributes. The constructor uses
@@ -58,7 +57,7 @@ public class Appliance {
 			int standby, int mean, double cycles, int length, int restart,
 			double calibration) {
 
-		this.name = name.toUpperCase();
+		this.id = name.toUpperCase();
 		this.use_profile = profile.toUpperCase();
 		this.ownership_rate = ownership;
 
@@ -151,15 +150,15 @@ public class Appliance {
 
 		// Some appliances have a custom (variable) power profile depending
 		// on the time left
-		if (this.name.equals("WASHING_MACHINE")
-				|| this.name.equals("WASHER_DRYER")) {
+		if (this.id.equals("WASHING_MACHINE")
+				|| this.id.equals("WASHER_DRYER")) {
 
 			int total_cycle_time = 0;
 
 			// Calculate the washing cycle time
-			if (this.name.equals("WASHING_MACHINE"))
+			if (this.id.equals("WASHING_MACHINE"))
 				total_cycle_time = 138;
-			if (this.name.equals("WASHER_DRYER"))
+			if (this.id.equals("WASHER_DRYER"))
 				total_cycle_time = 198;
 
 			// This is an example power profile for an example washing
@@ -223,16 +222,16 @@ public class Appliance {
 
 		// Use the TV watching length data approximation, derived from the
 		// TUS data
-		if ((this.name.equals("TV1")) || (this.name.equals("TV2"))
-				|| (this.name.equals("TV3"))) {
+		if ((this.id.equals("TV1")) || (this.id.equals("TV2"))
+				|| (this.id.equals("TV3"))) {
 
 			// The cycle length is approximated by the following function
 			// The average viewing time is approximately 73 minutes
 			length = (int) Math.round(70 * Math.pow(
 					(0 - Math.log10(1 - Uniform.staticNextDouble())), 1.1));
 
-		} else if ((this.name.equals("STORAGE_HEATER"))
-				|| (this.name.equals("ELEC_SPACE_HEATING"))) {
+		} else if ((this.id.equals("STORAGE_HEATER"))
+				|| (this.id.equals("ELEC_SPACE_HEATING"))) {
 
 			// Provide some variation on the cycle length of heating
 			// appliances
@@ -285,22 +284,6 @@ public class Appliance {
 	 */
 	public boolean isOff() {
 		return (cycle_time_left <= 0);
-	}
-
-	/**
-	 * Converts this Appliance object into a formatted String array for export.
-	 * 
-	 * @return a String array containing the Appliance's name, and then 1440
-	 *         entries representing the consumption in Watts at each minute
-	 *         interval.
-	 */
-	public String[] toExportString() {
-		String[] tmp = new String[consumption.length + 1];
-		tmp[0] = this.name;
-		for (int i = 0; i < consumption.length; i++)
-			tmp[i + 1] = String.valueOf(consumption[i]);
-		return tmp;
-
 	}
 
 	/**

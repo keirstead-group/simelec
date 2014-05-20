@@ -1,72 +1,135 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>uk.ac.imperial</groupId>
-  <artifactId>SimElec</artifactId>
-  <version>0.1.1</version>
-  <name>SimElec</name>
-  <description>A simulation model for domestic electricity consumption</description>
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>unit_tests</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source/>
-          <target/>
-        </configuration>
-      </plugin>
-      <plugin>
-            <groupId>com.zenjava</groupId>
-            <artifactId>javafx-maven-plugin</artifactId>
-            <version>2.0</version>
-            <configuration>
-                <mainClass>uk.ac.imperial.simelec.ui.SimElecUI</mainClass>
-            </configuration>
-            <dependencies>
-                <dependency>
-                    <groupId>org.twdata.maven</groupId>
-                    <artifactId>mojo-executor</artifactId>
-                    <version>2.1.0</version>
-                </dependency>
-            </dependencies>
-        </plugin>
-    </plugins>
-  </build>
-  <organization>
-  	<name>Imperial College London</name>
-  	<url>http://www.imperial.ac.uk</url>
-  </organization>
-  <dependencies>
-  	<dependency>
-  		<groupId>net.sf.opencsv</groupId>
-  		<artifactId>opencsv</artifactId>
-  		<version>2.3</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>colt</groupId>
-  		<artifactId>colt</artifactId>
-  		<version>1.2.0</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>junit</groupId>
-  		<artifactId>junit</artifactId>
-  		<version>4.11</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.zenjava</groupId>
-  		<artifactId>javafx-maven-plugin</artifactId>
-  		<version>2.0</version>
-  		<type>maven-plugin</type>
-  	</dependency>
-  </dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- General information -->
+	<groupId>uk.ac.imperial</groupId>
+	<artifactId>SimElec</artifactId>
+	<version>0.1.2</version>
+	<name>SimElec</name>
+	<description>A simulation model for domestic electricity consumption</description>
+
+	<properties>
+		<timestamp>${maven.build.timestamp}</timestamp>
+		<maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
+	</properties>
+
+	<organization>
+		<name>Imperial College London</name>
+		<url>http://www.imperial.ac.uk</url>
+	</organization>
+
+	<!-- Build properties -->
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<testSourceDirectory>unit_tests</testSourceDirectory>
+
+		<!-- Resources -->
+		<resources>
+			<resource>
+				<directory>src</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>docs/</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/version.txt</include>
+					<include>**/changes.txt</include>
+					<include>**/README.md</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>docs/</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/version.txt</exclude>
+					<exclude>**/changes.txt</exclude>
+					<exclude>**/README.md</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
+		<!-- Plugins -->
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source />
+					<target />
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>com.zenjava</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<mainClass>uk.ac.imperial.simelec.ui.SimElecUI</mainClass>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.twdata.maven</groupId>
+						<artifactId>mojo-executor</artifactId>
+						<version>2.1.0</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>build-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptor>src/assembly/bin.xml</descriptor>
+					<finalName>${project.name}-${project.version}</finalName>
+				</configuration>
+				<executions>
+					<execution>
+						<id>assemble-zip</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<!-- Dependencies -->
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>colt</groupId>
+			<artifactId>colt</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+	</dependencies>
+	
 </project>

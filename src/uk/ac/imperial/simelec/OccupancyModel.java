@@ -41,7 +41,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  * Simulates the number of active occupants within a household for a single day
  * at ten-minute intervals.
  * 
- * @author jkeirste
+ * @author James Keirstead
  * 
  */
 public class OccupancyModel {
@@ -123,7 +123,17 @@ public class OccupancyModel {
 		this.nResidents = SimElec.validateResidents(residents);
 		this.weekend = weekend;
 		this.out_dir = dir;
-		this.out_file = new File(dir, "occupancy_output.csv");
+		this.out_file = OccupancyModel.getOutputFile(dir);
+	}
+
+	/**
+	 * Gets the preferred output file for an OccupancyModel running in a specified directory.
+	 * 
+	 * @param dir	the output directory
+	 * @return the output File
+	 */
+	protected static File getOutputFile(String dir) {
+		return new File(dir, "occupancy_output.csv");		
 	}
 
 	/**

@@ -25,7 +25,18 @@
  */
 package uk.ac.imperial.simelec;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+import org.apache.commons.io.FileUtils;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * Simulates electricity demand for a single UK household
@@ -35,13 +46,22 @@ import java.io.IOException;
  */
 public class SimElec {
 
+	// Data files
+	private static String R_DIRECTORY = "/R";
+
 	private int month;
 	private int residents;
 	private boolean weekend;
 	private String output_dir;
+	private boolean runOccupancy = true;
 	private boolean runLighting = true;
 	private boolean runAppliances = true;
-	
+	private boolean makeRPlots = false;
+	private boolean applianceTotals = false;
+	private boolean lightingTotals = false;
+	private boolean grandTotals = true;
+	private double[] totalConsumption = new double[1440];
+
 	/**
 	 * Run the simulation.
 	 * 
@@ -164,18 +184,149 @@ public class SimElec {
 	public void run() throws IOException {
 
 		OccupancyModel occ = new OccupancyModel(residents, weekend, output_dir);
-		occ.run();
+
+		if (runOccupancy) {
+			occ.run();
+		}
 
 		if (runLighting) {
 			LightingModel lights = new LightingModel(month, output_dir, occ);
+			lights.setTotalsOnly(lightingTotals);
 			lights.run();
+
+			if (grandTotals) {
+				totalConsumption = addArrays(totalConsumption,
+						lights.getTotalConsumption());
+			}
+
 		}
-		
+
 		if (runAppliances) {
 			ApplianceModel appliances = new ApplianceModel(month, weekend,
 					output_dir, occ);
+			appliances.setTotalsOnly(applianceTotals);
 			appliances.run();
+
+			if (grandTotals) {
+				totalConsumption = addArrays(totalConsumption,
+						appliances.getTotalConsumption());
+			}
 		}
+
+		if (grandTotals) {
+			// Build the results array (only one line)
+			ArrayList<String[]> results = new ArrayList<String[]>(1);
+			String[] totalString = Load.buildExportString("TOTAL",
+					totalConsumption);
+			results.add(totalString);
+
+			// Write the data to a file
+			File file = new File(output_dir, "totals.csv");
+			CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '\0');
+			writer.writeAll(results);
+			writer.close();
+		}
+
+		if (makeRPlots) {
+			try {
+				makeRPlots();
+			} catch (Exception e) {
+				System.out.println("Unable to create R plots.");
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	/**
+	 * Performs an element-wise addition of two arrays
+	 * 
+	 * @param a
+	 *            the first array
+	 * @param b
+	 *            the second array
+	 * @return the sum array
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the arrays are not of equal length
+	 */
+	private static double[] addArrays(double[] a, double[] b) {
+
+		if (a.length != b.length) {
+			throw new IllegalArgumentException("Arrays must be of equal length");
+		}
+
+		double[] c = new double[a.length];
+		for (int i = 0; i < c.length; i++) {
+			c[i] = a[i] + b[i];
+		}
+
+		return c;
+	}
+
+	/**
+	 * Runs an R script to generate a summary plot
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * 
+	 */
+	private void makeRPlots() throws IOException, InterruptedException {
+
+		// First copy the scripts to the working directory
+		File destDir = new File(output_dir, "tmpR");
+		if (!destDir.exists())
+			destDir.mkdirs();
+
+		String fileName;
+		InputStream is = getClass().getResourceAsStream(
+				R_DIRECTORY.concat("/index.txt"));
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		while ((fileName = br.readLine()) != null) {
+			InputStream is2 = getClass().getResourceAsStream(
+					R_DIRECTORY.concat("/").concat(fileName));
+			File outFile = new File(destDir, fileName);
+			FileUtils.copyInputStreamToFile(is2, outFile);
+			is2.close();
+		}
+		br.close();
+
+		// Then figure out where the data and results should go
+		/*
+		 * The awkward construction is a hack to ensure that d: and d:\ behave
+		 * the same
+		 */
+		File dataDir = new File(output_dir, ".").getCanonicalFile();
+		File outputFile = new File(output_dir, "simelec.png");
+
+		// Then run the scripts
+		String cmd = String.format("Rscript make-summary-plot.r \"%s\" \"%s\"",
+				dataDir, outputFile.getCanonicalPath());
+
+		Process p;
+		StringBuffer output = new StringBuffer();
+		try {
+			p = Runtime.getRuntime().exec(cmd, null, destDir);
+			p.waitFor();
+
+			/*
+			 * Not going to do anything with this output at the moment
+			 */
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					p.getInputStream()));
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				output.append(line + "\n");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		// Then tidy up
+		FileUtils.deleteDirectory(destDir);
 
 	}
 
@@ -191,19 +342,103 @@ public class SimElec {
 
 	/**
 	 * Set whether to run the Appliance simulation
-	 *  
-	 * @param run 
+	 * 
+	 * @param run
 	 */
 	public void setRunAppliances(boolean run) {
-		this.runAppliances = run;		
+		this.runAppliances = run;
 	}
 
 	/**
 	 * Set whether to run the Lighting simulation
-	 *  
-	 * @param run 
+	 * 
+	 * @param run
 	 */
 	public void setRunLighting(boolean run) {
-		this.runLighting = run;		
+		this.runLighting = run;
 	}
+
+	/**
+	 * Set whether to make the R plots
+	 * 
+	 * @param makePlots
+	 *            a boolean indicating if the plots should be made
+	 */
+	public void setMakeRPlots(boolean makePlots) {
+		this.makeRPlots = makePlots;
+	}
+
+	/**
+	 * Set whether to calculate only the total loads for the appliance model.
+	 * 
+	 * @param total
+	 *            a boolean indicating if only the total appliance loads should
+	 *            be reported
+	 */
+	public void setAppliancesTotalsOnly(boolean total) {
+		this.applianceTotals = total;
+	}
+
+	/**
+	 * Set whether to calculate only the total loads for the lighting model.
+	 * 
+	 * @param total
+	 *            a boolean indicating if only the total lighting loads should
+	 *            be reported
+	 */
+	public void setLightingTotalsOnly(boolean total) {
+		this.lightingTotals = total;
+	}
+
+	/**
+	 * Set whether to calculate the grand total of all load models.
+	 * 
+	 * @param total
+	 *            a boolean indicating if the grand totals should be reported
+	 */
+	public void setCalculateGrandTotals(boolean total) {
+		this.grandTotals = total;
+	}
+
+	/**
+	 * Set whether to run the occupancy simulation. If this is set to false,
+	 * then you must provide the file <code>occupancy_output.csv</code> in the
+	 * output directory.
+	 * 
+	 * @param run
+	 *            should the occupancy model be run?
+	 * 
+	 * @throws FileNotFoundException
+	 *             if occupancy output file is not found
+	 */
+	public void setRunOccupancy(boolean run) throws FileNotFoundException {
+
+		/*
+		 * If we're turning off the occupancy model, then we have to ensure that
+		 * we already have an output file ready to process.
+		 */
+		if (!run) {
+
+			File f = OccupancyModel.getOutputFile(output_dir);
+			if (!f.exists()) {
+				String msg = String.format(
+						"Occupancy model output file '%s' not found.",
+						f.toString());
+				throw new FileNotFoundException(msg);
+			}
+		}
+
+		this.runOccupancy = run;
+	}
+
+	/**
+	 * Gets the total load profile from this SimElec simulation.
+	 * 
+	 * @return an array of length 1440 giving minute-by-minute electricity loads
+	 *         (W)
+	 */
+	public double[] getGrandTotals() {
+		return totalConsumption;
+	}
+	
 }
