@@ -5,7 +5,7 @@
 	<!-- General information -->
 	<groupId>uk.ac.imperial</groupId>
 	<artifactId>SimElec</artifactId>
-	<version>0.1.2-SNAPSHOT</version>
+	<version>0.1.2</version>
 	<name>SimElec</name>
 	<description>A simulation model for domestic electricity consumption</description>
 
@@ -47,7 +47,7 @@
 				<excludes>
 					<exclude>**/version.txt</exclude>
 					<exclude>**/changes.txt</exclude>
-					<exclude>**/readme.MD</exclude>
+					<exclude>**/README.md</exclude>
 				</excludes>
 			</resource>
 		</resources>
