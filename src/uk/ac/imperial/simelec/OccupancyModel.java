@@ -41,7 +41,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  * Simulates the number of active occupants within a household for a single day
  * at ten-minute intervals.
  * 
- * @author jkeirste
+ * @author James Keirstead
  * 
  */
 public class OccupancyModel {
